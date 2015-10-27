@@ -11,7 +11,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='titleplugin',
+            name='icon',
+        ),
+        migrations.AddField(
             model_name='titleplugin',
             name='icon',
             field=models.ForeignKey(blank=True, to='title_plugin.TitleIcon', null=True),

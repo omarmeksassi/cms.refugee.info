@@ -22,10 +22,4 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.AlterField(
-            model_name='titleplugin',
-            name='icon',
-            field=models.ForeignKey(blank=True, to='title_plugin.TitleIcon', null=True),
-            preserve_default=True,
-        ),
     ]
