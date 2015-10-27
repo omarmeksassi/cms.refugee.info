@@ -28,6 +28,66 @@
             float: left;
             width: 20%;
         }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
+        a {
+            color: white
+        }
+
+
+        h1.page-title {
+            font-size: 48pt;
+        }
+
+        .back-to-top {
+            color: white;
+            font-size: 75%;
+        }
+
+        table.important {
+            border: 1px white dashed;
+            width: 100%;
+            border-spacing: 0;
+            margin-bottom: 1em;
+        }
+
+        table.important > tbody > tr:last-child > td {
+            border-bottom: 0;
+        }
+
+        table.toc {
+            width: 100%;
+            border-spacing: 0;
+        }
+
+        table.toc td {
+            border-bottom: 1px white solid;
+            padding: 5px 5px;
+        }
+
+        table.toc a {
+            color: white;
+            text-decoration: none;
+        }
+
+        table.toc > tbody > tr > td:first-child {
+            width: 40px;
+        }
+
+        .title-icon {
+            width: 25px
+        }
+        hr.title-hr {
+          margin: 0;
+        }
+        h3.anchor {
+            margin-bottom: 2px;
+        }
     </style>
     {% render_block "css" %}
 </head>

@@ -1,8 +1,26 @@
+{% if important %}
+    <table class="toc important">
+        {% for p in important %}
+            <tr>
+                <td>
+                    {% if p.icon %}
+                        <img src="{{ MEDIA_URL }}{{ p.icon.icon }}" alt="{{ p.icon.name }}" class="title-icon"/>
+                    {% endif %}
+                </td>
+                <td><a href="#Anchor_{{ p.id }}">{{ p.title }}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
 <table class="toc">
-    {% for p in plugins %}
+    {% for p in not_important %}
         <tr>
-            <td>{{ p.icon }}</td>
-            <td><a href="#{{ p.id }}">{{ p.title }}</a></td>
+            <td>
+                {% if p.icon %}
+                    <img src="{{ MEDIA_URL }}{{ p.icon.icon }}" alt="{{ p.icon.name }}" class="title-icon"/>
+                {% endif %}
+            </td>
+            <td><a href="#Anchor_{{ p.id }}">{{ p.title }}</a></td>
         </tr>
     {% endfor %}
 </table>
