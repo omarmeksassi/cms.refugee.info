@@ -1,0 +1,9 @@
+{% load staticfiles %}
+<h3 class="anchor">
+    {% if instance.icon %}
+        <img src="{{ MEDIA_URL }}{{ instance.icon }}" alt="Icon"/>
+    {% endif %}
+    <a name="Anchor_{{ instance.id }}">{{ instance.title }}</a><br/>
+    <a href="#top" class="back-to-top">Back to top.</a>
+</h3>
+<hr class="title-hr"/>

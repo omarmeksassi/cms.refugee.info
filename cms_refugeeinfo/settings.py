@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'cms_refugeeinfo',
     'storages',
 
+'title_plugin',
 )
 
 LANGUAGES = (
@@ -229,28 +230,36 @@ MIGRATION_MODULES = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Amazon S3 credentials
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+if DEBUG:
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+else:
+    # Amazon S3 credentials
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
-# Amazon S3 URL
-AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+    # Amazon S3 URL
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
-# Static files location
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-STATIC_URL = S3_URL
+    # Static files location
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATIC_URL = S3_URL
 
-# Default File storage
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-MEDIA_URL = S3_URL
+    # Default File storage
+    MEDIAFILES_LOCATION = 'media'
+    MEDIA_URL = "http://%s.s3.amazonaws.com/%s/" % (AWS_STORAGE_BUCKET_NAME, MEDIAFILES_LOCATION)
+    DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
 ALLOWED_HOSTS = ['*']
 
 import dj_database_url
 
-DATABASES['default'] = dj_database_url.config()
+DJ_URL =  dj_database_url.config()
+if 'ENGINE' in DJ_URL:
+    DATABASES['default'] = DJ_URL
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

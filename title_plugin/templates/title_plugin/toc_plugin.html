@@ -1,0 +1,8 @@
+<table class="toc">
+    {% for p in plugins %}
+        <tr>
+            <td>{{ p.icon }}</td>
+            <td><a href="#{{ p.id }}">{{ p.title }}</a></td>
+        </tr>
+    {% endfor %}
+</table>
