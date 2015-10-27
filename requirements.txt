@@ -26,3 +26,4 @@ Pillow==3.0.0
 pytz==2015.7
 six==1.10.0
 tzlocal==1.2
+gunicorn==19.3.0
