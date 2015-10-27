@@ -4,7 +4,7 @@ __author__ = 'reyrodrigues'
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
-from .models import TitlePlugin, TocPlugin
+from .models import TitlePlugin, TocPlugin, LinkButtonPlugin
 from django.utils.translation import ugettext as _
 
 
@@ -37,5 +37,19 @@ class CMSTitlePlugin(CMSPluginBase):
         return context
 
 
+
+class CMSLinkButtonPlugin(CMSPluginBase):
+    model = LinkButtonPlugin  # model where plugin data are saved
+    module = _("Site Content")
+    name = _("Link Button")  # name of the plugin in the interface
+    render_template = "title_plugin/link_button.html"
+    text_enabled = True
+
+    def render(self, context, instance, placeholder):
+        context.update({'instance': instance})
+        return context
+
+
 plugin_pool.register_plugin(CMSTitlePlugin)  # register the plugin
 plugin_pool.register_plugin(CMSTocPlugin)  # register the plugin
+plugin_pool.register_plugin(CMSLinkButtonPlugin)  # register the plugin

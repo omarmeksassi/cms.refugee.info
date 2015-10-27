@@ -11,8 +11,16 @@ class TocPlugin(CMSPlugin):
         return "Table of contents"
 
 
+class LinkButtonPlugin(CMSPlugin):
+    name = models.CharField(max_length=250, verbose_name=_('Name'), )
+    url = models.URLField(blank=True, null=True, verbose_name=_('Url'))
+
+    def __unicode__(self):
+        return self.name
+
+
 class TitleIcon(models.Model):
-    name = models.CharField(max_length=250, )
+    name = models.CharField(max_length=250, verbose_name=_('Name'))
     icon = models.ImageField(blank=True, null=True, verbose_name=_('Icon'))
 
     def __unicode__(self):
@@ -21,8 +29,8 @@ class TitleIcon(models.Model):
 
 class TitlePlugin(CMSPlugin):
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name=_('Title'))
-    is_important = models.BooleanField(default=False)
-    icon = models.ForeignKey(TitleIcon, null=True, blank=True)
+    is_important = models.BooleanField(default=False, verbose_name=_('Is Important'))
+    icon = models.ForeignKey(TitleIcon, null=True, blank=True, verbose_name=_('Icon'))
 
     def __unicode__(self):
         return self.title
