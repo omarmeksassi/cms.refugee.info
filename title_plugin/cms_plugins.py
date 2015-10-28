@@ -16,6 +16,7 @@ class CMSTocPlugin(CMSPluginBase):
 
     def render(self, context, instance, placeholder):
         plugins = list(instance.placeholder.cmsplugin_set.all())
+        plugins = [a for a in plugins if a.language == instance.language]
         plugins = [a.get_plugin_instance()[0] for a in sorted(plugins, key=lambda p: p.position)
                    if type(a.get_plugin_instance()[1]) is CMSTitlePlugin]
 
