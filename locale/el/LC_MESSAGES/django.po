@@ -1,0 +1,80 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-28 18:21+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: cms_refugeeinfo/settings.py:145 cms_refugeeinfo/settings.py:164
+msgid "en"
+msgstr ""
+
+#: cms_refugeeinfo/settings.py:146 cms_refugeeinfo/settings.py:171
+msgid "ar"
+msgstr ""
+
+#: cms_refugeeinfo/settings.py:147 cms_refugeeinfo/settings.py:178
+msgid "fa"
+msgstr ""
+
+#: cms_refugeeinfo/settings.py:148 cms_refugeeinfo/settings.py:185
+msgid "ps"
+msgstr ""
+
+#: cms_refugeeinfo/settings.py:149 cms_refugeeinfo/settings.py:192
+msgid "el"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:13 title_plugin/cms_plugins.py:33
+#: title_plugin/cms_plugins.py:44
+msgid "Site Content"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:14
+msgid "Table of contents"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:34
+msgid "Section Title"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:45
+msgid "Link Button"
+msgstr ""
+
+#: title_plugin/models.py:15 title_plugin/models.py:23
+msgid "Name"
+msgstr ""
+
+#: title_plugin/models.py:16
+msgid "Url"
+msgstr ""
+
+#: title_plugin/models.py:24 title_plugin/models.py:33
+msgid "Icon"
+msgstr ""
+
+#: title_plugin/models.py:31
+msgid "Title"
+msgstr ""
+
+#: title_plugin/models.py:32
+msgid "Is Important"
+msgstr ""
+
+#: title_plugin/templates/title_plugin/title_plugin.html:8
+msgid "Back to top"
+msgstr ""
