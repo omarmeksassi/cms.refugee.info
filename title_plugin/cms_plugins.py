@@ -23,7 +23,7 @@ class CMSTocPlugin(CMSPluginBase):
         important = [a for a in plugins if a.is_important]
         not_important = [a for a in plugins if not a.is_important]
 
-        context.update({'not_important': set(not_important), 'important': set(important)})
+        context.update({'not_important': not_important, 'important': important})
 
         return context
 
