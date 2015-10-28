@@ -39,7 +39,6 @@
             color: white
         }
 
-
         h1.page-title {
             font-size: 48pt;
         }
@@ -82,9 +81,11 @@
         .title-icon {
             width: 25px
         }
+
         hr.title-hr {
-          margin: 0;
+            margin: 0;
         }
+
         h3.anchor {
             margin-bottom: 2px;
         }
@@ -95,18 +96,21 @@
             background-color: #ffffff;
             display: block;
             width: 250px;
-            color: #000000!important;
+            color: #000000 !important;
             font-size: 100%;
             font-weight: bold;
             text-align: center;
             text-decoration: none;
         }
     </style>
+
     {% render_block "css" %}
 </head>
 <body>
 {% cms_toolbar %}
-{% block content %}{% endblock content %}
+<div class="language-{{ LANGUAGE_CODE }}">
+    {% block content %}{% endblock content %}
+</div>
 {% render_block "js" %}
 </body>
 </html>
