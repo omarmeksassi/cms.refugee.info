@@ -137,7 +137,7 @@ INSTALLED_APPS = (
     'cms_refugeeinfo',
     'storages',
 
-'title_plugin',
+    'title_plugin',
 )
 
 LANGUAGES = (
@@ -242,24 +242,25 @@ S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 # Static files location
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-STATIC_URL = S3_URL
 
 # Default File storage
 MEDIAFILES_LOCATION = 'media'
-MEDIA_URL = "http://%s.s3.amazonaws.com/%s/" % (AWS_STORAGE_BUCKET_NAME, MEDIAFILES_LOCATION)
+
+MEDIA_URL = "https://dttv0ybwk2jfe.cloudfront.net/%s/" % ( MEDIAFILES_LOCATION,)
+STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
+
 DEFAULT_FILE_STORAGE = 'cms_refugeeinfo.custom_storages.MediaStorage'
 
 ALLOWED_HOSTS = ['*']
 
 import dj_database_url
 
-DJ_URL =  dj_database_url.config()
+DJ_URL = dj_database_url.config()
 if 'ENGINE' in DJ_URL:
     DATABASES['default'] = DJ_URL
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 LOGGING = {
     'version': 1,
