@@ -76,4 +76,4 @@ msgstr ""
 
 #: title_plugin/templates/title_plugin/title_plugin.html:8
 msgid "Back to top"
-msgstr "Επιστροφή στην αρχική σελίδα"
+msgstr "سر ته وراستون شئ"
