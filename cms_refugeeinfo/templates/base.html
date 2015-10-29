@@ -151,9 +151,10 @@
 
     {% render_block "css" %}
 </head>
+
 <body>
 {% cms_toolbar %}
-<div class="language-{{ LANGUAGE_CODE }}">
+<div class="cms-content language-{{ LANGUAGE_CODE }}">
     {% block content %}{% endblock content %}
 </div>
 {% render_block "js" %}
