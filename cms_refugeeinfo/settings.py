@@ -96,7 +96,7 @@ TEMPLATE_DIRS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'cms_refugeeinfo.basic_auth.BasicAuthMiddleware',
+    #'cms_refugeeinfo.basic_auth.BasicAuthMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -110,6 +110,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS = (
+    'storages',
+
     'djangocms_admin_style',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,7 +138,6 @@ INSTALLED_APPS = (
     'djangocms_video',
     'reversion',
     'cms_refugeeinfo',
-    'storages',
 
     'title_plugin',
 )
@@ -146,7 +147,7 @@ LANGUAGES = (
     ('en', gettext('en')),
     ('ar', gettext('ar')),
     ('fa', gettext('fa')),
-    ('ps', gettext('ps')),
+    ('af', gettext('Pashto')),
     ('el', gettext('el')),
 )
 
@@ -181,9 +182,9 @@ CMS_LANGUAGES = {
         },
         {
             'public': True,
-            'code': 'ps',
+            'code': 'af',
             'hide_untranslated': False,
-            'name': gettext('ps'),
+            'name': gettext('Pashto'),
             'redirect_on_fallback': True,
         },
         {
@@ -239,18 +240,19 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 # Amazon S3 URL
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 # Static files location
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 
 # Default File storage
 MEDIAFILES_LOCATION = 'media'
+STATICFILES_LOCATION = 'static'
 
 MEDIA_URL = "https://dttv0ybwk2jfe.cloudfront.net/%s/" % ( MEDIAFILES_LOCATION,)
 STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
+ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
-DEFAULT_FILE_STORAGE = 'cms_refugeeinfo.custom_storages.MediaStorage'
+DEFAULT_FILE_STORAGE = 'cms_refugeeinfo.custom_storages.MediaFilesStorage'
 
 ALLOWED_HOSTS = ['*']
 
@@ -278,6 +280,7 @@ LOGGING = {
         },
     },
 }
+
 
 CMS_PUBLIC_FOR = 'staff'
 DEBUG = False

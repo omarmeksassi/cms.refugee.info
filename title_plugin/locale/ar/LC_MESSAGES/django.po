@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-28 18:21+0200\n"
+"POT-Creation-Date: 2015-10-29 19:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,23 +19,23 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: cms_refugeeinfo/settings.py:145 cms_refugeeinfo/settings.py:164
+#: cms_refugeeinfo/settings.py:147 cms_refugeeinfo/settings.py:166
 msgid "en"
 msgstr "English"
 
-#: cms_refugeeinfo/settings.py:146 cms_refugeeinfo/settings.py:171
+#: cms_refugeeinfo/settings.py:148 cms_refugeeinfo/settings.py:173
 msgid "ar"
 msgstr "Arabic"
 
-#: cms_refugeeinfo/settings.py:147 cms_refugeeinfo/settings.py:178
+#: cms_refugeeinfo/settings.py:149 cms_refugeeinfo/settings.py:180
 msgid "fa"
 msgstr ""
 
-#: cms_refugeeinfo/settings.py:148 cms_refugeeinfo/settings.py:185
+#: cms_refugeeinfo/settings.py:150 cms_refugeeinfo/settings.py:187
 msgid "ps"
 msgstr ""
 
-#: cms_refugeeinfo/settings.py:149 cms_refugeeinfo/settings.py:192
+#: cms_refugeeinfo/settings.py:151 cms_refugeeinfo/settings.py:194
 msgid "el"
 msgstr ""
 
