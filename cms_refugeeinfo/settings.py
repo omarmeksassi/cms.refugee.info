@@ -96,6 +96,7 @@ TEMPLATE_DIRS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'cms_refugeeinfo.basic_auth.BasicAuthMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -277,3 +278,6 @@ LOGGING = {
         },
     },
 }
+
+CMS_PUBLIC_FOR = 'staff'
+DEBUG = False
