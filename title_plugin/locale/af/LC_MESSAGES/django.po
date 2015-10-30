@@ -62,6 +62,7 @@ msgstr ""
 msgid "Url"
 msgstr ""
 
+
 #: title_plugin/models.py:24 title_plugin/models.py:33
 msgid "Icon"
 msgstr ""
