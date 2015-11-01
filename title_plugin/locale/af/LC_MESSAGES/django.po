@@ -77,4 +77,5 @@ msgstr ""
 
 #: title_plugin/templates/title_plugin/title_plugin.html:8
 msgid "Back to top"
-msgstr "سر ته وراستون شئ"
+msgstr "بېرته سر ته"
+

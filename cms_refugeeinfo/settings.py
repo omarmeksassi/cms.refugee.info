@@ -24,9 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'fkura$#8!926!quc%_ebwbk_t&*orvg3a&)+07vnl0vs^1c9@w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
+DEBUG = TEMPLATE_DEBUG = 'DATABASE_URL' not in os.environ
 
 ALLOWED_HOSTS = []
 
@@ -208,6 +206,25 @@ CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
 
+CKEDITOR_SETTINGS = {
+    'language': '{{ language }}',
+    'toolbar_CMS': [
+        ['Undo', 'Redo'],
+        ['cmsplugins', '-', 'ShowBlocks'],
+        ['Format', 'Styles'],
+        ['TextColor', 'BGColor', '-', 'PasteText', 'PasteFromWord'],
+        ['Maximize', ''],
+        '/',
+        ['Bold', 'Italic', 'Underline', '-', 'Subscript', 'Superscript', '-', 'RemoveFormat'],
+        ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'BidiLtr','BidiRtl'],
+        ['HorizontalRule'],
+        ['Link', 'Unlink', 'Anchor'],
+        ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Table'],
+        ['Source']
+    ],
+    'skin': 'moono',
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -280,7 +297,6 @@ LOGGING = {
         },
     },
 }
-
 
 CMS_PUBLIC_FOR = 'staff'
 DEBUG = False

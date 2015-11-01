@@ -33,6 +33,7 @@ class CMSTitlePlugin(CMSPluginBase):
     module = _("Site Content")
     name = _("Section Title")  # name of the plugin in the interface
     render_template = "title_plugin/title_plugin.html"
+    text_enabled = True
 
     def render(self, context, instance, placeholder):
         context.update({'instance': instance})

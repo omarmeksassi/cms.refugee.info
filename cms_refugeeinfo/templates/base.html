@@ -133,9 +133,11 @@
             margin-left: .5em;
             margin-right: .5em;
         }
+
         .language-en, .language-el {
             direction: ltr;
         }
+
         .language-ar, .language-ps, .language-af, .language-fa {
             direction: rtl;
         }
@@ -155,7 +157,10 @@
 <body>
 {% cms_toolbar %}
 <div class="cms-content language-{{ LANGUAGE_CODE }}">
-    {% block content %}{% endblock content %}
+    <h1 class="page-title page-{{ LANGUAGE_CODE }}">{% page_attribute "page_title" %}</h1>
+    {% block content %}
+        {% placeholder "content" %}
+    {% endblock content %}
 </div>
 {% render_block "js" %}
 </body>
