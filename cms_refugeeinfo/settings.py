@@ -293,10 +293,10 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN'),
         },
     },
 }
 
 CMS_PUBLIC_FOR = 'staff'
-DEBUG = False
+#DEBUG = False
