@@ -29,5 +29,4 @@ six==1.10.0
 tzlocal==1.2
 xlrd==0.9.4
 xlwt==1.0.0
-gunicorn==19.3.0
 psycopg2
