@@ -8,6 +8,7 @@ from djangocms_text_ckeditor import cms_plugins
 import title_plugin.cms_plugins
 import xlwt
 from StringIO import StringIO
+import csv
 
 class Command(BaseCommand):
     help = 'Generate Content POT'
@@ -19,7 +20,6 @@ class Command(BaseCommand):
         page_id = args[0]
 
         a = [a.get_public_object() for a in Page.objects.filter(id=page_id)]
-        book = xlwt.Workbook()
         messages = []
         for b in a:
             for c in b.get_placeholders():
@@ -44,23 +44,13 @@ class Command(BaseCommand):
                         line.update(text='')
                     line.update(translated='')
                     messages.append(line)
-        sheet = book.add_sheet('Translations')
-
-        style = xlwt.XFStyle()
-        aligned = xlwt.XFStyle()
-        aligned.alignment.wrap = 1
-
-        if messages:
-            keys = ["text", "translated", "position", "type", "parent", "id"]
-            for j, col in enumerate(keys):
-                sheet.write(0, j, col)
-
-            for i, row in enumerate(messages):
-                for j, col in enumerate(keys):
-                    sheet.write(i + 1, j, row[col], aligned if j < 2 else style)
 
         out = StringIO()
-        book.save(out)
+        keys = ["text", "translated", "position", "type", "parent", "id"]
+
+        writer = csv.DictWriter(out, keys, quoting=csv.QUOTE_ALL)
+        writer.writeheader()
+        writer.writerows(messages)
 
         out.seek(0)
         print(out.read())
