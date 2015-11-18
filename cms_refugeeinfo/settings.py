@@ -142,11 +142,11 @@ INSTALLED_APPS = (
 
 LANGUAGES = (
     # # Customize this
-    ('en', gettext('en')),
-    ('ar', gettext('ar')),
-    ('fa', gettext('fa')),
+    ('en', gettext('English')),
+    ('ar', gettext('Arabic')),
+    ('fa', gettext('Farsi')),
     ('af', gettext('Pashto')),
-    ('el', gettext('el')),
+    ('el', gettext('Greek')),
 )
 
 CMS_LANGUAGES = {
