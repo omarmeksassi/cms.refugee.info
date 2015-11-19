@@ -7,8 +7,6 @@ from django.template import RequestContext
 from django.conf import settings
 from django.shortcuts import render
 from cms.models import Title
-import djangocms_text_ckeditor.cms_plugins
-import title_plugin.cms_plugins
 import email.utils
 import time
 
@@ -19,7 +17,8 @@ import cms.api
 
 from lxml import etree
 from lxml.cssselect import CSSSelector
-from StringIO import  StringIO
+from StringIO import StringIO
+
 
 def generate_blank(request, slug):
     staging = Title.objects.filter(language='en', slug='staging')
@@ -32,43 +31,7 @@ def generate_blank(request, slug):
 
     page = titles[0].page.get_public_object()
 
-    messages = []
-    for placeholder in page.get_placeholders():
-        for plugin in placeholder.get_plugins('en'):
-            line = {}
-            instance, t = plugin.get_plugin_instance()
-            line.update(id=instance.id)
-            line.update(position=instance.get_position_in_placeholder())
-            line.update(type=type(t).__name__)
-            if instance.get_parent():
-                line.update(parent=instance.get_parent().id)
-            else:
-                line.update(parent='')
-
-            if type(t) is djangocms_text_ckeditor.cms_plugins.TextPlugin:
-                line.update(text=instance.body.encode('ascii', 'xmlcharrefreplace'))
-            elif type(t) is title_plugin.cms_plugins.CMSTitlePlugin:
-                line.update(text=instance.title.encode('ascii', 'xmlcharrefreplace'))
-            elif type(t) is title_plugin.cms_plugins.CMSLinkButtonPlugin:
-                line.update(text=instance.name.encode('ascii', 'xmlcharrefreplace'))
-            else:
-                line.update(text='')
-            line.update(translated='')
-            line['text'] = line['text'].replace('&#160;', ' ')
-            messages.append(line)
-
-    div_format = """<div data-id="{id}"
-    data-position="{position}"
-    data-type="{type}"
-    data-parent="{parent}">{text}</div>"""
-
-    html = "<html>"
-    html += "<body>"
-    html += '\n'.join(
-        [div_format.format(**a) for a in messages]
-    )
-    html += "</body>"
-    html += "</html>"
+    html = _generate_html_for_translations(titles[0], page)
 
     timestamp = time.mktime(page.publication_date.timetuple())
 
@@ -87,46 +50,7 @@ def push_to_transifex(request, slug):
         raise Http404
 
     page = titles[0].page.get_public_object()
-
-    messages = []
-    for placeholder in page.get_placeholders():
-        for plugin in placeholder.get_plugins('en'):
-            line = {}
-            instance, t = plugin.get_plugin_instance()
-            line.update(id=instance.id)
-            line.update(position=instance.get_position_in_placeholder())
-            line.update(type=type(t).__name__)
-            if instance.get_parent():
-                line.update(parent=instance.get_parent().id)
-            else:
-                line.update(parent='')
-
-            if type(t) is djangocms_text_ckeditor.cms_plugins.TextPlugin:
-                line.update(text=instance.body.encode('ascii', 'xmlcharrefreplace'))
-            elif type(t) is title_plugin.cms_plugins.CMSTitlePlugin:
-                line.update(text=instance.title.encode('ascii', 'xmlcharrefreplace'))
-            elif type(t) is title_plugin.cms_plugins.CMSLinkButtonPlugin:
-                line.update(text=instance.name.encode('ascii', 'xmlcharrefreplace'))
-            else:
-                line.update(text='')
-            line.update(translated='')
-            line['text'] = line['text'].replace('&#160;', ' ')
-            messages.append(line)
-
-    div_format = """<div data-id="{id}"
-    data-position="{position}"
-    data-type="{type}"
-    data-parent="{parent}">{text}</div>"""
-
-    html = "<html>"
-    html += "<body>"
-    html += '\n'.join(
-        [div_format.format(**a) for a in messages]
-    )
-    html += "</body>"
-    html += "</html>"
-
-    timestamp = time.mktime(page.publication_date.timetuple())
+    html = _generate_html_for_translations(titles[0], page)
 
     password = settings.TRANSIFEX_PASSWORD
     user = settings.TRANSIFEX_USER
@@ -157,7 +81,7 @@ def push_to_transifex(request, slug):
                            data=json.dumps(payload), )
         print('New', r2.text)
     else:
-        r2 = requests.put(fetch_format.format(**transifex_url_data),
+        r2 = requests.put(fetch_format.format(**transifex_url_data) + 'content/',
                           headers={"Content-type": "application/json"},
                           auth=(user, password),
                           data=json.dumps(payload), )
@@ -186,7 +110,6 @@ def pull_from_transifex(request, slug, language):
         "language": language
     }
     fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
-    # $ curl -i -L --user username:password -X GET &file
 
     r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
@@ -196,8 +119,16 @@ def pull_from_transifex(request, slug, language):
     parser = etree.HTMLParser()
     tree = etree.parse(html, parser)
     selector = CSSSelector('div[data-id]')
+    title_selector = CSSSelector('div.title')
 
     content = selector(tree.getroot())
+    title = title_selector(tree.getroot())
+    if title:
+        title = title[0].text
+        title_obj = page.get_title_obj(language)
+        title_obj.page_title = title
+        title_obj.save()
+
     dict_list = []
 
     for div in content:
@@ -212,28 +143,7 @@ def pull_from_transifex(request, slug, language):
         }
         dict_list.append(plugin_dict)
 
-    for c in page.get_placeholders():
-        c.clear(language)
-
-    cms.api.copy_plugins_to_language(page, 'en', language)
-    for c in page.get_placeholders():
-        for d in c.get_plugins(language):
-            instance, t = d.get_plugin_instance()
-            typename = type(t).__name__
-            position = instance.get_position_in_placeholder()
-            translation = [a for a in dict_list if int(a['position']) == position and a['type'] == typename]
-            if translation:
-                translation = translation[0]
-                translation['translated_id'] = instance.id
-                if typename == "TextPlugin":
-                    instance.body = translation['translated']
-                elif typename == "CMSTitlePlugin":
-                    instance.title = translation['translated']
-                elif typename == "CMSLinkButtonPlugin":
-                    instance.name = translation['translated']
-                print('Translated', typename)
-                instance.save()
-
+    _translate_page(dict_list, language, page)
     cms.api.publish_page(page, request.user, language)
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
@@ -256,7 +166,7 @@ def copy_from_production(request, slug):
         staging_page = staging_title.page
         production_page = production_title.page
 
-        duplicate_page(production_page, staging_page, True, request.user)
+        _duplicate_page(production_page, staging_page, True, request.user)
 
     return render(request, "copy-from-production.html", {}, context_instance=RequestContext(request))
 
@@ -278,16 +188,12 @@ def promote_to_production(request, slug):
         staging_page = staging_title.page
         production_page = production_title.page
 
-        duplicate_page(staging_page, production_page, False, request.user)
+        _duplicate_page(staging_page, production_page, False, request.user)
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
 
 
-def upload_translations(request, slug):
-    raise Http404
-
-
-def duplicate_page(source, destination, publish=None, user=None):
+def _duplicate_page(source, destination, publish=None, user=None):
     placeholders = source.get_placeholders()
 
     source = source.get_public_object()
@@ -308,10 +214,79 @@ def duplicate_page(source, destination, publish=None, user=None):
                 placeholder.cmsplugin_set.filter(language=k).order_by('path')
             )
             copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot], k)
-            print(copied_plugins)
     if publish:
         try:
             for k, v in settings.LANGUAGES:
                 cms.api.publish_page(destination, user, k)
         except Exception as e:
             pass
+
+
+def _generate_html_for_translations(title, page):
+    messages = []
+    for placeholder in page.get_placeholders():
+        for plugin in placeholder.get_plugins('en'):
+            line = {}
+            instance, t = plugin.get_plugin_instance()
+            line.update(id=instance.id)
+            line.update(position=instance.get_position_in_placeholder())
+
+            type_name = type(t).__name__
+            line.update(type=type_name)
+
+            if instance.get_parent():
+                line.update(parent=instance.get_parent().id)
+            else:
+                line.update(parent='')
+
+            if hasattr(instance, 'body'):
+                line.update(text=instance.body.encode('ascii', 'xmlcharrefreplace'))
+            elif hasattr(instance, 'title'):
+                line.update(text=instance.title.encode('ascii', 'xmlcharrefreplace'))
+            elif hasattr(instance, 'name'):
+                line.update(text=instance.name.encode('ascii', 'xmlcharrefreplace'))
+            else:
+                line.update(text='')
+            line.update(translated='')
+            line['text'] = line['text'].replace('&#160;', ' ')
+            messages.append(line)
+    div_format = """<div data-id="{id}"
+    data-position="{position}"
+    data-type="{type}"
+    data-parent="{parent}">{text}</div>"""
+    html = "<html>"
+    html += "<body>"
+    html += "<div class='title'>{}</div>".format(title.page_title)
+    html += '\n'.join(
+        [div_format.format(**a) for a in messages]
+    )
+    html += "</body>"
+    html += "</html>"
+
+    return html
+
+
+def _translate_page(dict_list, language, page):
+    for c in page.get_placeholders():
+        c.clear(language)
+    cms.api.copy_plugins_to_language(page, 'en', language)
+    for c in page.get_placeholders():
+        for d in c.get_plugins(language):
+            instance, t = d.get_plugin_instance()
+            type_name = type(t).__name__
+            position = instance.get_position_in_placeholder()
+            translation = [a for a in dict_list if int(a['position']) == position and a['type'] == type_name]
+
+            if translation:
+                translation = translation[0]
+                translation['translated_id'] = instance.id
+
+                text = translation['translated']
+
+                if hasattr(instance, 'body'):
+                    instance.body = text
+                elif hasattr(instance, 'title'):
+                    instance.title = text
+                elif hasattr(instance, 'name'):
+                    instance.name = text
+                instance.save()

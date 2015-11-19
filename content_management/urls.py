@@ -14,8 +14,6 @@ urlpatterns = [
         name="promote-to-production"),
 
 
-    url(r'^(?P<slug>[a-zA-Z\-0-9]+)/upload-translations/?$', views.upload_translations, ),
-
 ]
 
 

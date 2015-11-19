@@ -209,7 +209,7 @@ CKEDITOR_SETTINGS = {
     'language': '{{ language }}',
     'toolbar_CMS': [
         ['Undo', 'Redo'],
-        ['cmsplugins', '-', 'ShowBlocks'],
+        ['ShowBlocks'],
         ['Format', 'Styles'],
         ['TextColor', 'BGColor', '-', 'PasteText', 'PasteFromWord'],
         ['Maximize', ''],
