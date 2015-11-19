@@ -5,7 +5,6 @@ import json
 
 from django.shortcuts import render, redirect
 from django.template import RequestContext
-from django.contrib.gis.geos import fromstr
 from django.http import HttpResponse, Http404, HttpResponseNotModified
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
