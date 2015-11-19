@@ -18,6 +18,7 @@ class Command(BaseCommand):
             return
 
         page_id = args[0]
+        is_html = True if len(args) == 1 else False if args[1] == 'csv' else True
 
         a = [a.get_public_object() for a in Page.objects.filter(id=page_id)]
         messages = []
@@ -43,6 +44,7 @@ class Command(BaseCommand):
                     else:
                         line.update(text='')
                     line.update(translated='')
+                    line['text'] = line['text'].replace('&#160;', ' ')
                     messages.append(line)
 
         out = StringIO()
@@ -52,5 +54,21 @@ class Command(BaseCommand):
         writer.writeheader()
         writer.writerows(messages)
 
+        div_format = """<div data-id="{id}"
+        data-position="{position}"
+        data-type="{type}"
+        data-parent="{parent}">{text}</div>"""
         out.seek(0)
-        print(out.read())
+
+        html = "<html>"
+        html += "<body>"
+        html += '\n'.join(
+            [div_format.format(**a) for a in messages]
+        )
+        html += "</body>"
+        html += "</html>"
+
+        if not is_html:
+            print(out.read())
+        else:
+            print (html)
