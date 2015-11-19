@@ -263,6 +263,12 @@ STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 MEDIAFILES_LOCATION = 'media'
 STATICFILES_LOCATION = 'static'
 
+
+#Transifex Creds
+TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
+TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
+TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
+
 MEDIA_URL = "https://dttv0ybwk2jfe.cloudfront.net/%s/" % ( MEDIAFILES_LOCATION,)
 STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'

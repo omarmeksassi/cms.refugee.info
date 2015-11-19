@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     url(r'^(?P<slug>[a-zA-Z\-0-9]+)/generate-blank/?$', views.generate_blank, ),
+    url(r'^(?P<slug>[a-zA-Z\-0-9]+)/push-to-transifex/?$', views.push_to_transifex, ),
     url(r'^(?P<slug>[a-zA-Z\-0-9]+)/upload-translations/?$', views.upload_translations, ),
 
 ]
