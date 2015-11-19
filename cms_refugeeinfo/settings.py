@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'cms_refugeeinfo',
 
     'title_plugin',
+    'content_management',
 )
 
 LANGUAGES = (

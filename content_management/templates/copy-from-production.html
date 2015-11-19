@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script>
+    setTimeout(function () {
+        parent.location.reload();
+        parent.CMS.$('.cms_modal').css('display', 'none');
+        parent.CMS.$('.cms_modal-frame').children().remove();
+
+    });
+</script>
+</body>
+</html>
