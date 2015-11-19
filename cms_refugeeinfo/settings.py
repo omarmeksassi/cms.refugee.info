@@ -136,6 +136,9 @@ INSTALLED_APPS = (
     'djangocms_video',
     'reversion',
     'cms_refugeeinfo',
+    'filer',
+    'easy_thumbnails',
+    'mptt',
 
     'title_plugin',
     'content_management',
@@ -217,7 +220,7 @@ CKEDITOR_SETTINGS = {
         ['Bold', 'Italic', 'Underline', '-', 'Subscript', 'Superscript', '-', 'RemoveFormat'],
         ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'BidiLtr','BidiRtl'],
         ['HorizontalRule'],
-        ['Link', 'Unlink', 'Anchor'],
+        ['Link', 'Unlink', 'Anchor', 'Image'],
         ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Table'],
         ['Source']
     ],

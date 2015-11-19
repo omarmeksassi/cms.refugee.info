@@ -33,3 +33,4 @@ psycopg2
 lxml
 cssselect
 requests
+django-filer
