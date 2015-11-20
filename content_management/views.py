@@ -20,6 +20,13 @@ from lxml.cssselect import CSSSelector
 from StringIO import StringIO
 
 
+SHIM_LANGUAGE_DICTIONARY = {
+    'af': 'ps'
+}
+"""
+The Shim above is because django doesnt support Pashto, but Transifex does.
+"""
+
 def generate_blank(request, slug):
     staging = Title.objects.filter(language='en', slug='staging')
     if staging:
@@ -103,6 +110,9 @@ def pull_from_transifex(request, slug, language):
 
     password = settings.TRANSIFEX_PASSWORD
     user = settings.TRANSIFEX_USER
+
+    if language in SHIM_LANGUAGE_DICTIONARY.keys():
+        language = SHIM_LANGUAGE_DICTIONARY[language]
 
     transifex_url_data = {
         "project": settings.TRANSIFEX_PROJECT_SLUG,
