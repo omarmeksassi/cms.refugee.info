@@ -27,6 +27,7 @@ SHIM_LANGUAGE_DICTIONARY = {
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
+
 def generate_blank(request, slug):
     staging = Title.objects.filter(language='en', slug='staging')
     if staging:
@@ -235,7 +236,10 @@ def _duplicate_page(source, destination, publish=None, user=None):
 def _generate_html_for_translations(title, page):
     messages = []
     for placeholder in page.get_placeholders():
-        for plugin in placeholder.get_plugins('en'):
+        sort_function = lambda item: item.get_plugin_instance()[0].get_position_in_placeholder()
+        plugins = sorted(placeholder.get_plugins('en'), key=sort_function)
+
+        for plugin in plugins:
             line = {}
             instance, t = plugin.get_plugin_instance()
             line.update(id=instance.id)
