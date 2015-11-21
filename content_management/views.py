@@ -133,6 +133,14 @@ def pull_from_transifex(request, slug, language):
     selector = CSSSelector('div[data-id]')
     title_selector = CSSSelector('div.title')
 
+    """
+    Directions are handled application-wise
+    """
+    p_selector = CSSSelector('p[dir]')
+
+    for p in p_selector(tree.getroot()):
+        del p.attrib['dir']
+
     content = selector(tree.getroot())
     title = title_selector(tree.getroot())
     if title:
