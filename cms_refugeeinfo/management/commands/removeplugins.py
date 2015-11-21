@@ -39,6 +39,7 @@ class Command(BaseCommand):
 
                         img = CSSSelector('[id=plugin_obj_{}]'.format(child_instance.id))(tree)
                         if not img:
+                            child.delete()
                             continue
 
                         img = img[0]
@@ -64,6 +65,7 @@ class Command(BaseCommand):
                             parent.remove(img)
 
                             child.delete()
+
 
                     body = selector(tree)[0]
 
