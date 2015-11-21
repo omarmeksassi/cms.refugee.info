@@ -112,13 +112,14 @@ def pull_from_transifex(request, slug, language):
     password = settings.TRANSIFEX_PASSWORD
     user = settings.TRANSIFEX_USER
 
+    transifex_language = language
     if language in SHIM_LANGUAGE_DICTIONARY.keys():
-        language = SHIM_LANGUAGE_DICTIONARY[language]
+        transifex_language = SHIM_LANGUAGE_DICTIONARY[language]
 
     transifex_url_data = {
         "project": settings.TRANSIFEX_PROJECT_SLUG,
         "slug": page.get_slug('en'),
-        "language": language
+        "language": transifex_language
     }
     fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
 
