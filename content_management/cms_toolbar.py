@@ -41,10 +41,13 @@ class ContentToolbar(CMSToolbar):
                 #
                 if not position:
                     # OK, use the ADMINISTRATION_BREAK location + 1
-                    position = admin_menu.find_first(
+                    first = admin_menu.find_first(
                         Break,
                         identifier=ADMINISTRATION_BREAK
-                    ) + 1
+                    )
+                    if not first:
+                        return
+                    position = first+ 1
                     # Insert our own menu-break, at this new position. We'll insert
                     # all subsequent menus before this, so it will ultimately come
                     # after all of our applications' menus.
