@@ -63,7 +63,7 @@ class Command(BaseCommand):
                             parent.insert(parent.index(img), element)
                             parent.remove(img)
 
-                        child.delete()
+                            child.delete()
 
                     body = selector(tree)[0]
 
