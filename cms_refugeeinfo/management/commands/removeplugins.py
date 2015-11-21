@@ -63,6 +63,8 @@ class Command(BaseCommand):
                             parent.insert(parent.index(img), element)
                             parent.remove(img)
 
+                        child.delete()
+
                     body = selector(tree)[0]
 
                     out = (body.text or '') + '\n'.join(
