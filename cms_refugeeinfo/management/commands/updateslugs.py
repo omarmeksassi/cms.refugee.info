@@ -42,4 +42,7 @@ class Command(BaseCommand):
                 print ('Updating title of page {} language {}'.format(title.page_id, title.language))
 
             for l in dict(settings.LANGUAGES).keys():
-                api.publish_page(page, blame, l)
+                try:
+                    api.publish_page(page, blame, l)
+                except Exception as e:
+                    pass
