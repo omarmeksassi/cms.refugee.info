@@ -208,7 +208,7 @@ CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
 
-_CKEDITOR_SETTINGS = {
+CKEDITOR_SETTINGS = {
     'language': '{{ language }}',
     'toolbar_CMS': [
         ['Undo', 'Redo'],
