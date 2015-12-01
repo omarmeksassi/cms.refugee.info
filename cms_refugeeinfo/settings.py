@@ -142,7 +142,6 @@ INSTALLED_APPS = (
 
     'title_plugin',
     'content_management',
-    'landing',
 )
 
 LANGUAGES = (
