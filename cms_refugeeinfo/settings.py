@@ -142,6 +142,7 @@ INSTALLED_APPS = (
 
     'title_plugin',
     'content_management',
+    'landing',
 )
 
 LANGUAGES = (
@@ -208,7 +209,7 @@ CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
 
-CKEDITOR_SETTINGS = {
+_CKEDITOR_SETTINGS = {
     'language': '{{ language }}',
     'toolbar_CMS': [
         ['Undo', 'Redo'],
