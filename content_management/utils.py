@@ -67,7 +67,7 @@ def push_to_transifex(page_pk):
 
 
 SHIM_LANGUAGE_DICTIONARY = {
-    'af': 'ps'
+    'ps': 'af'
 }
 """
 The Shim above is because django doesnt support Pashto, but Transifex does.
@@ -80,6 +80,7 @@ def pull_from_transifex(slug, language):
         return
     import cms.api
 
+    internal_language = language if language not in SHIM_LANGUAGE_DICTIONARY else SHIM_LANGUAGE_DICTIONARY[language]
 
     # cache.add fails if the key already exists
     acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
@@ -92,10 +93,10 @@ def pull_from_transifex(slug, language):
             break
         time.sleep(5)
 
-    staging = Title.objects.filter(language=language, slug='staging')
+    staging = Title.objects.filter(language=internal_language, slug='staging')
     if staging:
         staging = staging[0].page
-    titles = Title.objects.filter(language=language, slug=slug, page__in=staging.get_descendants())
+    titles = Title.objects.filter(language=internal_language, slug=slug, page__in=staging.get_descendants())
 
     page = titles[0].page.get_draft_object()
 
@@ -103,9 +104,6 @@ def pull_from_transifex(slug, language):
     user = settings.TRANSIFEX_USER
 
     transifex_language = language
-    if language in SHIM_LANGUAGE_DICTIONARY.keys():
-        transifex_language = SHIM_LANGUAGE_DICTIONARY[language]
-
     transifex_url_data = {
         "project": settings.TRANSIFEX_PROJECT_SLUG,
         "slug": page.get_slug('en'),
@@ -138,7 +136,7 @@ def pull_from_transifex(slug, language):
     title = title_selector(tree.getroot())
     if title:
         title = title[0].text
-        title_obj = page.get_title_obj(language)
+        title_obj = page.get_title_obj(internal_language)
         title_obj.page_title = title
         title_obj.save()
 
@@ -157,8 +155,8 @@ def pull_from_transifex(slug, language):
         dict_list.append(plugin_dict)
     blame = User.objects.filter(is_staff=True)[0]
 
-    _translate_page(dict_list, language, page)
-    cms.api.publish_page(page, blame, language)
+    _translate_page(dict_list, internal_language, page)
+    cms.api.publish_page(page, blame, internal_language)
     release_lock()
 
 
