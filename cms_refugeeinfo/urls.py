@@ -24,7 +24,7 @@ def landing(request):
     if not request.user.is_anonymous():
         return details(request, '')
 
-    return redirect(urlresolvers.reverse('admin:index'))
+    return redirect('/en/admin/login/?next=/en/')
 
 
 urlpatterns = i18n_patterns('',
