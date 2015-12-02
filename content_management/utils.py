@@ -89,8 +89,8 @@ def pull_from_transifex(slug, language):
 
     while True:
         if acquire_lock():
-            time.sleep(5)
             break
+        time.sleep(5)
 
     staging = Title.objects.filter(language=language, slug='staging')
     if staging:
