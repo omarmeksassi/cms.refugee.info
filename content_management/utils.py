@@ -71,9 +71,13 @@ SHIM_LANGUAGE_DICTIONARY = {
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
+
 @celery_app.task
 def pull_from_transifex(slug, language):
+    if language == 'en':
+        return
     import cms.api
+
     staging = Title.objects.filter(language=language, slug='staging')
     if staging:
         staging = staging[0].page
@@ -191,6 +195,7 @@ def _generate_html_for_translations(title, page):
 
 def _translate_page(dict_list, language, page):
     import cms.api
+
     for c in page.get_placeholders():
         c.clear(language)
     cms.api.copy_plugins_to_language(page, 'en', language)
