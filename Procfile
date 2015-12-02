@@ -1,2 +1,2 @@
-web: gunicorn cms_refugeeinfo.wsgi --log-file -
+web: gunicorn cms_refugeeinfo.wsgi --timeout 120 --log-file -
 
