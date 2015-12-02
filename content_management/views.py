@@ -11,13 +11,13 @@ import email.utils
 import time
 
 import requests
-import json
 from cms.utils import copy_plugins
 import cms.api
 
 from lxml import etree
 from lxml.cssselect import CSSSelector
 from StringIO import StringIO
+from . import utils
 
 
 SHIM_LANGUAGE_DICTIONARY = {
@@ -58,118 +58,27 @@ def push_to_transifex(request, slug):
         raise Http404
 
     page = titles[0].page.get_public_object()
-    html = _generate_html_for_translations(titles[0], page)
 
-    password = settings.TRANSIFEX_PASSWORD
-    user = settings.TRANSIFEX_USER
 
-    transifex_url_data = {
-        "project": settings.TRANSIFEX_PROJECT_SLUG,
-        "slug": page.get_slug('en')
-    }
-    fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/"
-    post_format = "http://www.transifex.com/api/2/project/{project}/resources/"
-
-    r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
-
-    is_new = r.status_code == 404
-
-    payload = {
-        "content": html,
-        "slug": transifex_url_data['slug'] + 'html',
-        "name": transifex_url_data['slug'] + '.html',
-    }
-    if is_new:
-        payload.update({
-            "i18n_type": 'HTML',
-        })
-        r2 = requests.post(post_format.format(**transifex_url_data),
-                           headers={"Content-type": "application/json"},
-                           auth=(user, password),
-                           data=json.dumps(payload), )
-        print('New', r2.text)
-    else:
-        r2 = requests.put(fetch_format.format(**transifex_url_data) + 'content/',
-                          headers={"Content-type": "application/json"},
-                          auth=(user, password),
-                          data=json.dumps(payload), )
-        print('Updated', r2.text)
+    utils.push_to_transifex.delay(page.pk)
 
     return render(request, "push-to-transifex.html", {}, context_instance=RequestContext(request))
 
 
 def pull_from_transifex(request, slug, language):
-    staging = Title.objects.filter(language=language, slug='staging')
-    if staging:
-        staging = staging[0].page
-    titles = Title.objects.filter(language=language, slug=slug, page__in=staging.get_descendants())
-
-    if not titles:
-        raise Http404
-
-    page = titles[0].page.get_draft_object()
-
-    password = settings.TRANSIFEX_PASSWORD
-    user = settings.TRANSIFEX_USER
-
-    transifex_language = language
-    if language in SHIM_LANGUAGE_DICTIONARY.keys():
-        transifex_language = SHIM_LANGUAGE_DICTIONARY[language]
-
-    transifex_url_data = {
-        "project": settings.TRANSIFEX_PROJECT_SLUG,
-        "slug": page.get_slug('en'),
-        "language": transifex_language
-    }
-    fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
-
-    print ("Trying to request:", fetch_format.format(**transifex_url_data))
-    print("With creds:", user, password)
-
-    r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
-
-    translation = r.json()
-    html = StringIO(translation['content'])
-
-    parser = etree.HTMLParser()
-    tree = etree.parse(html, parser)
-    selector = CSSSelector('div[data-id]')
-    title_selector = CSSSelector('div.title')
-
-    """
-    Directions are handled application-wise
-    """
-    dir_selector = CSSSelector('[dir]')
-
-    for element in dir_selector(tree.getroot()):
-        del element.attrib['dir']
-
-    content = selector(tree.getroot())
-    title = title_selector(tree.getroot())
-    if title:
-        title = title[0].text
-        title_obj = page.get_title_obj(language)
-        title_obj.page_title = title
-        title_obj.save()
-
-    dict_list = []
-
-    for div in content:
-        plugin_dict = {
-            'id': div.attrib['data-id'],
-            'type': div.attrib['data-type'],
-            'parent': div.attrib['data-parent'],
-            'position': div.attrib['data-position'],
-            'translated': (div.text or '') + ''.join([
-                etree.tostring(a, pretty_print=True, method="html") for a in div
-            ]),
-        }
-        dict_list.append(plugin_dict)
-
-    _translate_page(dict_list, language, page)
-    cms.api.publish_page(page, request.user, language)
+    utils.pull_from_transifex.delay(slug, language)
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def receive_translation(request):
+    slug = request.POST.get('resource').lower().replace('html', '')
+    language = request.POST.get('language').lower()
+    utils.pull_from_transifex.delay(slug, language)
+
+    return HttpResponse("")
 
 
 def copy_from_production(request, slug):
