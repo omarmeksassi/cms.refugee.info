@@ -74,7 +74,7 @@ def receive_translation(request):
     language = request.POST.get('language').lower()
     import random
 
-    utils.pull_from_transifex.delay(slug, language, countdown=random.randint(10, 50))
+    utils.pull_from_transifex.apply_async(args=(slug, language), countdown=random.randint(10, 50))
 
     return HttpResponse("")
 
