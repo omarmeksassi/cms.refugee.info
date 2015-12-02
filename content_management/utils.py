@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from cms.models import Title, Page
 import json
+from django.core.cache import cache
 
 import requests
 
@@ -14,7 +15,7 @@ from lxml.cssselect import CSSSelector
 from StringIO import StringIO
 
 from cms_refugeeinfo import celery_app
-
+import time
 
 @celery_app.task
 def push_to_transifex(page_pk):
@@ -142,8 +143,20 @@ def pull_from_transifex(slug, language):
         }
         dict_list.append(plugin_dict)
     blame = User.objects.filter(is_staff=True)[0]
-    _translate_page(dict_list, language, page)
-    cms.api.publish_page(page, blame, language)
+
+
+    # cache.add fails if the key already exists
+    acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5 )
+    # memcache delete is very slow, but we have to use it to take
+    # advantage of using add() for atomic locking
+    release_lock = lambda: cache.delete('publishing-translation')
+
+    while True:
+        if acquire_lock():
+            _translate_page(dict_list, language, page)
+            cms.api.publish_page(page, blame, language)
+            return
+        time.sleep(5)
 
 
 def _generate_html_for_translations(title, page):
