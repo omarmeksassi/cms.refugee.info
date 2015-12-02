@@ -17,6 +17,7 @@ from StringIO import StringIO
 from cms_refugeeinfo import celery_app
 import time
 
+
 @celery_app.task
 def push_to_transifex(page_pk):
     page = Page.objects.get(pk=page_pk)
@@ -78,6 +79,18 @@ def pull_from_transifex(slug, language):
     if language == 'en':
         return
     import cms.api
+
+
+    # cache.add fails if the key already exists
+    acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
+    # memcache delete is very slow, but we have to use it to take
+    # advantage of using add() for atomic locking
+    release_lock = lambda: cache.delete('publishing-translation')
+
+    while True:
+        if acquire_lock():
+            time.sleep(5)
+            break
 
     staging = Title.objects.filter(language=language, slug='staging')
     if staging:
@@ -144,19 +157,9 @@ def pull_from_transifex(slug, language):
         dict_list.append(plugin_dict)
     blame = User.objects.filter(is_staff=True)[0]
 
-
-    # cache.add fails if the key already exists
-    acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5 )
-    # memcache delete is very slow, but we have to use it to take
-    # advantage of using add() for atomic locking
-    release_lock = lambda: cache.delete('publishing-translation')
-
-    while True:
-        if acquire_lock():
-            _translate_page(dict_list, language, page)
-            cms.api.publish_page(page, blame, language)
-            return
-        time.sleep(5)
+    _translate_page(dict_list, language, page)
+    cms.api.publish_page(page, blame, language)
+    release_lock()
 
 
 def _generate_html_for_translations(title, page):

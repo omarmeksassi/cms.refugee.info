@@ -10,15 +10,10 @@ from cms.models import Title
 import email.utils
 import time
 
-import requests
 from cms.utils import copy_plugins
 import cms.api
 
-from lxml import etree
-from lxml.cssselect import CSSSelector
-from StringIO import StringIO
 from . import utils
-
 
 SHIM_LANGUAGE_DICTIONARY = {
     'af': 'ps'
@@ -59,7 +54,6 @@ def push_to_transifex(request, slug):
 
     page = titles[0].page.get_public_object()
 
-
     utils.push_to_transifex.delay(page.pk)
 
     return render(request, "push-to-transifex.html", {}, context_instance=RequestContext(request))
@@ -70,12 +64,18 @@ def pull_from_transifex(request, slug, language):
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
 
+
 from django.views.decorators.csrf import csrf_exempt
+
 
 @csrf_exempt
 def receive_translation(request):
     slug = request.POST.get('resource').lower().replace('html', '')
     language = request.POST.get('language').lower()
+    import random
+
+    time.sleep(random.randint(0, 5))
+
     utils.pull_from_transifex.delay(slug, language)
 
     return HttpResponse("")
