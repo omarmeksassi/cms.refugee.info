@@ -123,6 +123,9 @@ def pull_from_transifex(request, slug, language):
     }
     fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
 
+    print ("Trying to request:", fetch_format.format(**transifex_url_data))
+    print("With creds:", user, password)
+
     r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
     translation = r.json()
