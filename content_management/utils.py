@@ -98,6 +98,10 @@ def pull_from_transifex(slug, language):
         staging = staging[0].page
     titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
 
+    if not titles:
+        print('Page not found. Ignoring.')
+        return
+
     page = titles[0].page.get_draft_object()
 
     password = settings.TRANSIFEX_PASSWORD
