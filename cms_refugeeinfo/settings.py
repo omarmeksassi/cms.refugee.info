@@ -32,9 +32,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 
-
-
-
 ROOT_URLCONF = 'cms_refugeeinfo.urls'
 
 WSGI_APPLICATION = 'cms_refugeeinfo.wsgi.application'
@@ -278,10 +275,11 @@ TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
 TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 
-MEDIA_URL = "https://dttv0ybwk2jfe.cloudfront.net/%s/" % ( MEDIAFILES_LOCATION,)
 
 STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
-STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
+
+MEDIA_URL = 'https://{}/{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'), MEDIAFILES_LOCATION)
+STATIC_URL = 'https://{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'))
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 DEFAULT_FILE_STORAGE = 'cms_refugeeinfo.custom_storages.MediaFilesStorage'
@@ -314,4 +312,3 @@ LOGGING = {
 }
 
 CMS_PUBLIC_FOR = 'staff'
-#DEBUG = False
