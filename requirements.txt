@@ -20,7 +20,7 @@ django-reversion
 django-sekizai
 django-storages
 django-treebeard
-djangocms-admin-style
+djangocms-admin-style>=1.0.0
 djangocms-column
 djangocms-file
 djangocms-flash
