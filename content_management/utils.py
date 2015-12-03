@@ -135,10 +135,23 @@ def pull_from_transifex(slug, language):
     content = selector(tree.getroot())
     title = title_selector(tree.getroot())
     if title:
-        title = title[0].text
-        title_obj = page.get_title_obj(internal_language)
-        title_obj.page_title = title
-        title_obj.save()
+        try:
+            title = title[0].text
+            title_obj = page.get_title_obj(internal_language)
+            if type(title).__name__ == 'str':
+                en_title_obj = page.get_title_obj('en')
+                title_obj, created = Title.objects.get_or_create(
+                    page=page,
+                    slug=en_title_obj.slug,
+                    language=internal_language,
+                    title=en_title_obj.title,
+                )
+                title_obj.update_path()
+                title_obj.save()
+            title_obj.page_title = title
+            title_obj.save()
+        except Exception as e:
+            print('Error updating the application.')
 
     dict_list = []
 
