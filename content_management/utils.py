@@ -93,10 +93,10 @@ def pull_from_transifex(slug, language):
             break
         time.sleep(5)
 
-    staging = Title.objects.filter(language=internal_language, slug='staging')
+    staging = Title.objects.filter(language='en', slug='staging')
     if staging:
         staging = staging[0].page
-    titles = Title.objects.filter(language=internal_language, slug=slug, page__in=staging.get_descendants())
+    titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
 
     page = titles[0].page.get_draft_object()
 
@@ -140,13 +140,12 @@ def pull_from_transifex(slug, language):
             title_obj = page.get_title_obj(internal_language)
             if type(title).__name__ == 'EmptyTitle':
                 en_title_obj = page.get_title_obj('en')
-                title_obj, created = Title.objects.get_or_create(
-                    page=page,
-                    slug=en_title_obj.slug,
+                title_obj = cms.api.create_title(
                     language=internal_language,
                     title=en_title_obj.title,
+                    page=page,
+                    slug=en_title_obj.slug,
                 )
-                title_obj.update_path()
                 title_obj.save()
             title_obj.page_title = title
             title_obj.save()
@@ -210,7 +209,7 @@ def _generate_html_for_translations(title, page):
     data-parent="{parent}">{text}</div>"""
     html = "<html>"
     html += "<body>"
-    html += "<div class='title'>{}</div>".format(title.page_title)
+    html += "<div class='title'>{}</div>".format(title.page_title or title.title)
     html += '\n'.join(
         [div_format.format(**a) for a in messages]
     )
