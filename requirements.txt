@@ -1,4 +1,4 @@
-Django
+Django>=1.8
 Django-Select2
 MySQL-python
 Pillow
@@ -12,7 +12,7 @@ cssselect
 dj-database-url
 django-celery
 django-classy-tags
-django-cms
+django-cms>=3.2
 django-filer
 django-mptt
 django-polymorphic

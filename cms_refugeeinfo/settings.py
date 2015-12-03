@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'fkura$#8!926!quc%_ebwbk_t&*orvg3a&)+07vnl0vs^1c9@w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = TEMPLATE_DEBUG = 'DATABASE_URL' not in os.environ
+DEBUG = True # 'DATABASE_URL' not in os.environ
 
 ALLOWED_HOSTS = []
 
@@ -68,29 +68,34 @@ STATICFILES_DIRS = (
 )
 SITE_ID = 1
 
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader'
-)
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.request',
-    'django.core.context_processors.media',
-    'django.core.context_processors.csrf',
-    'django.core.context_processors.tz',
-    'sekizai.context_processors.sekizai',
-    'django.core.context_processors.static',
-    'cms.context_processors.cms_settings'
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.i18n',
+                'django.core.context_processors.debug',
+                'django.core.context_processors.request',
+                'django.core.context_processors.media',
+                'django.core.context_processors.csrf',
+                'django.core.context_processors.tz',
+                'sekizai.context_processors.sekizai',
+                'django.core.context_processors.static',
+                'cms.context_processors.cms_settings'
+            ],
+        },
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'cms_refugeeinfo', 'templates'),
-)
+    },
+]
+
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -220,7 +225,7 @@ CKEDITOR_SETTINGS = {
         ['Maximize', ''],
         '/',
         ['Bold', 'Italic', 'Underline', '-', 'Subscript', 'Superscript', '-', 'RemoveFormat'],
-        ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'BidiLtr','BidiRtl'],
+        ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'BidiLtr', 'BidiRtl'],
         ['HorizontalRule'],
         ['Link', 'Unlink', 'Anchor', 'Image'],
         ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Table'],
@@ -262,22 +267,27 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 # Amazon S3 URL
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 
-# Static files location
-STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 
 # Default File storage
 MEDIAFILES_LOCATION = 'media'
 STATICFILES_LOCATION = 'static'
 
 
-#Transifex Creds
+# Transifex Creds
 TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
 TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 
 MEDIA_URL = "https://dttv0ybwk2jfe.cloudfront.net/%s/" % ( MEDIAFILES_LOCATION,)
-STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
-ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
+
+
+if not DEBUG:
+    # Static files location
+    STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
+    STATIC_URL = 'https://dttv0ybwk2jfe.cloudfront.net/'
+    ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
+else:
+    STATIC_URL = '/static/'
 
 DEFAULT_FILE_STORAGE = 'cms_refugeeinfo.custom_storages.MediaFilesStorage'
 
