@@ -20,7 +20,7 @@ class ContentToolbar(CMSToolbar):
             staging = staging[0].page
             public_objects = set([p.get_public_object() for p in staging.get_descendants()])
 
-            if page.id in [p.id for p in public_objects]:
+            if page.id in [p.id for p in public_objects if p]:
                 admin_menu = self.toolbar.get_or_create_menu(
                     PAGE_MENU_IDENTIFIER, _('Page')
                 )
