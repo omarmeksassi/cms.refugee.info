@@ -18,7 +18,9 @@ class ContentToolbar(CMSToolbar):
 
         if staging:
             staging = staging[0].page
-            if page.id in [p.get_public_object().id for p in staging.get_descendants()]:
+            public_objects = set([p.get_public_object() for p in staging.get_descendants()])
+
+            if page.id in [p.id for p in public_objects]:
                 admin_menu = self.toolbar.get_or_create_menu(
                     PAGE_MENU_IDENTIFIER, _('Page')
                 )
@@ -72,8 +74,8 @@ class ContentToolbar(CMSToolbar):
                                   kwargs={'slug': page.get_slug(), 'language': self.current_lang})
                     content_menu.add_modal_item(_('Download translations'), url=url)
 
-                url = reverse('copy-from-production', kwargs={'slug': page.get_slug()})
-                content_menu.add_modal_item(_('Copy from production'), url=url)
+                #url = reverse('copy-from-production', kwargs={'slug': page.get_slug()})
+                #content_menu.add_modal_item(_('Copy from production'), url=url)
 
                 url = reverse('promote-to-production', kwargs={'slug': page.get_slug()})
                 content_menu.add_modal_item(_('Promote to production'), url=url)
