@@ -138,7 +138,7 @@ def pull_from_transifex(slug, language):
         try:
             title = title[0].text
             title_obj = page.get_title_obj(internal_language)
-            if type(title).__name__ == 'str':
+            if type(title).__name__ == 'EmptyTitle':
                 en_title_obj = page.get_title_obj('en')
                 title_obj, created = Title.objects.get_or_create(
                     page=page,
