@@ -116,6 +116,7 @@ def pull_from_transifex(slug, language):
 
     r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
+    print("Received from transifex:", r.text)
     translation = r.json()
     html = StringIO(translation['content'])
 
@@ -137,8 +138,9 @@ def pull_from_transifex(slug, language):
     if title:
         try:
             title = title[0].text
-            title_obj = page.get_title_obj(internal_language)
-            if type(title).__name__ == 'EmptyTitle':
+            title_obj = page.get_title_obj(internal_language, fallback=False)
+            if type(title_obj).__name__ == 'EmptyTitle':
+                print('Creating new title')
                 en_title_obj = page.get_title_obj('en')
                 title_obj = cms.api.create_title(
                     language=internal_language,
