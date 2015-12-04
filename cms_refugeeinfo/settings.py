@@ -155,6 +155,9 @@ LANGUAGES = (
     ('fa', gettext('Farsi')),
     ('af', gettext('Pashto')),
     ('el', gettext('Greek')),
+    ('mk', gettext('Macedonian')),
+    ('rs', gettext('Serbian')),
+    ('de', gettext('German')),
 )
 
 CMS_LANGUAGES = {
@@ -169,21 +172,21 @@ CMS_LANGUAGES = {
             'public': True,
             'code': 'en',
             'hide_untranslated': False,
-            'name': gettext('en'),
+            'name': gettext('English'),
             'redirect_on_fallback': True,
         },
         {
             'public': True,
             'code': 'ar',
             'hide_untranslated': False,
-            'name': gettext('ar'),
+            'name': gettext('Arabic'),
             'redirect_on_fallback': True,
         },
         {
             'public': True,
             'code': 'fa',
             'hide_untranslated': False,
-            'name': gettext('fa'),
+            'name': gettext('Farsi'),
             'redirect_on_fallback': True,
         },
         {
@@ -197,9 +200,31 @@ CMS_LANGUAGES = {
             'public': True,
             'code': 'el',
             'hide_untranslated': False,
-            'name': gettext('el'),
+            'name': gettext('Greek'),
             'redirect_on_fallback': True,
         },
+
+        #{
+        #    'public': True,
+        #    'code': 'rs',
+        #    'hide_untranslated': False,
+        #    'name': gettext('Serbian'),
+        #    'redirect_on_fallback': True,
+        #},
+        #{
+        #    'public': True,
+        #    'code': 'mk',
+        #    'hide_untranslated': False,
+        #    'name': gettext('Macedonian'),
+        #    'redirect_on_fallback': True,
+        #},
+        #{
+        #    'public': True,
+        #    'code': 'de',
+        #    'hide_untranslated': False,
+        #    'name': gettext('German'),
+        #    'redirect_on_fallback': True,
+        #},
     ],
 }
 
