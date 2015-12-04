@@ -155,9 +155,9 @@ LANGUAGES = (
     ('fa', gettext('Farsi')),
     ('af', gettext('Pashto')),
     ('el', gettext('Greek')),
-    ('mk', gettext('Macedonian')),
-    ('rs', gettext('Serbian')),
-    ('de', gettext('German')),
+    #('mk', gettext('Macedonian')),
+    #('rs', gettext('Serbian')),
+    #('de', gettext('German')),
 )
 
 CMS_LANGUAGES = {
