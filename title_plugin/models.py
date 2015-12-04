@@ -34,3 +34,9 @@ class TitlePlugin(CMSPlugin):
 
     def __unicode__(self):
         return self.title
+
+class SoundCloudPlugin(CMSPlugin):
+    url = models.URLField(max_length=300, null=True, blank=True, verbose_name=_('SoundCloud Url'))
+
+    def __unicode__(self):
+        return "SoundCloud Url: {}".format(self.url)

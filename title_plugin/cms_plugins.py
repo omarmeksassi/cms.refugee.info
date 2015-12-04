@@ -4,7 +4,7 @@ __author__ = 'reyrodrigues'
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
-from .models import TitlePlugin, TocPlugin, LinkButtonPlugin
+from .models import TitlePlugin, TocPlugin, LinkButtonPlugin, SoundCloudPlugin
 from django.utils.translation import ugettext as _
 
 
@@ -51,7 +51,19 @@ class CMSLinkButtonPlugin(CMSPluginBase):
         context.update({'instance': instance})
         return context
 
+class CMSSoundCloudPlugin(CMSPluginBase):
+    model = SoundCloudPlugin  # model where plugin data are saved
+    module = _("Site Content")
+    name = _("SoundClound File")  # name of the plugin in the interface
+    render_template = "soundcloud_plugin/soundcloud_plugin.html"
+    text_enabled = False
+
+    def render(self, context, instance, placeholder):
+        context.update({'instance': instance})
+        return context
+
 
 plugin_pool.register_plugin(CMSTitlePlugin)  # register the plugin
 plugin_pool.register_plugin(CMSTocPlugin)  # register the plugin
 plugin_pool.register_plugin(CMSLinkButtonPlugin)  # register the plugin
+plugin_pool.register_plugin(CMSSoundCloudPlugin)  # register the plugin
