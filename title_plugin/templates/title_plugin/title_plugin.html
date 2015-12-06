@@ -1,10 +1,12 @@
 {% load staticfiles %}
 {% load i18n %}
-<h3 class="anchor">
-    {% if instance.icon %}
-        <img src="{{ MEDIA_URL }}{{ instance.icon.icon }}" alt="{{ instance.icon.name }}" class="title-icon"/>
-    {% endif %} &nbsp;
-    <a name="Anchor_{{ instance.id }}">{{ instance.title }}</a><br/>
-    <a href="#top" class="back-to-top">{% trans "Back to top" %}</a>
-</h3>
-<hr class="title-hr"/>
+<div class="section-header{% if instance.is_important %} important{% endif %}">
+    <h3 class="anchor">
+        {% if instance.icon %}
+            <img src="{{ MEDIA_URL }}{{ instance.icon.icon }}" alt="{{ instance.icon.name }}" class="title-icon"/>
+        {% endif %} &nbsp;
+        <a name="Anchor_{{ instance.id }}">{{ instance.title }}</a><br/>
+        <a href="#top" class="back-to-top">{% trans "Back to top" %}</a>
+    </h3>
+    <hr class="title-hr"/>
+</div>
