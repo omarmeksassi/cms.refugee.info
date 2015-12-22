@@ -129,13 +129,33 @@ def _duplicate_page(source, destination, publish=None, user=None):
 
     source = source.get_public_object()
     destination = destination.get_draft_object()
+    en_title = source.get_title_obj(language='en')
 
     destination_placeholders = dict([(a.slot, a) for a in destination.get_placeholders()])
     for k, v in settings.LANGUAGES:
         available = [a.language for a in destination.title_set.all()]
         title = source.get_title_obj(language=k)
+
+        # Doing some cleanup while I am at it
+        if en_title and title:
+            title.title = en_title.title
+            title.slug = en_title.slug
+            if hasattr(title, 'save'):
+                title.save()
+
         if not k in available:
-            cms.api.create_title(k, title.title, destination, menu_title=title.menu_title, slug=title.slug)
+            cms.api.create_title(k, title.title, destination, slug=title.slug)
+
+        try:
+            destination_title = destination.get_title_obj(language=k)
+            if en_title and title and destination_title:
+                destination_title.page_title = title.page_title
+                destination_title.slug = en_title.slug
+
+                if hasattr(destination_title, 'save'):
+                    destination_title.save()
+        except Exception as e:
+            print("Error updating title.")
 
     for placeholder in placeholders:
         destination_placeholders[placeholder.slot].clear()
