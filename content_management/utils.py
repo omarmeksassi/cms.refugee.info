@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from cms.models import Title, Page
 import json
 from django.core.cache import cache
+from django.db import transaction
 
 import requests
 
@@ -76,106 +77,107 @@ The Shim above is because django doesnt support Pashto, but Transifex does.
 
 @celery_app.task
 def pull_from_transifex(slug, language):
-    if language == 'en':
-        return
-    import cms.api
+    with transaction.atomic():
+        if language == 'en':
+            return
+        import cms.api
 
-    internal_language = language if language not in SHIM_LANGUAGE_DICTIONARY else SHIM_LANGUAGE_DICTIONARY[language]
+        internal_language = language if language not in SHIM_LANGUAGE_DICTIONARY else SHIM_LANGUAGE_DICTIONARY[language]
 
-    # cache.add fails if the key already exists
-    acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
-    # memcache delete is very slow, but we have to use it to take
-    # advantage of using add() for atomic locking
-    release_lock = lambda: cache.delete('publishing-translation')
+        # cache.add fails if the key already exists
+        acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
+        # memcache delete is very slow, but we have to use it to take
+        # advantage of using add() for atomic locking
+        release_lock = lambda: cache.delete('publishing-translation')
 
-    while True:
-        if acquire_lock():
-            break
-        time.sleep(5)
+        while True:
+            if acquire_lock():
+                break
+            time.sleep(5)
 
-    staging = Title.objects.filter(language='en', slug='staging')
-    if staging:
-        staging = staging[0].page
-    titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
+        staging = Title.objects.filter(language='en', slug='staging')
+        if staging:
+            staging = staging[0].page
+        titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
 
-    if not titles:
-        print('Page not found. Ignoring.')
-        return
+        if not titles:
+            print('Page not found. Ignoring.')
+            return
 
-    page = titles[0].page.get_draft_object()
+        page = titles[0].page.get_draft_object()
 
-    password = settings.TRANSIFEX_PASSWORD
-    user = settings.TRANSIFEX_USER
+        password = settings.TRANSIFEX_PASSWORD
+        user = settings.TRANSIFEX_USER
 
-    transifex_language = language
-    transifex_url_data = {
-        "project": settings.TRANSIFEX_PROJECT_SLUG,
-        "slug": page.get_slug('en'),
-        "language": transifex_language
-    }
-    fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
-
-    print("Trying to request:", fetch_format.format(**transifex_url_data))
-    print("With creds:", user, password)
-
-    r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
-
-    print("Received from transifex:", r.text)
-    translation = r.json()
-    html = StringIO(translation['content'])
-
-    parser = etree.HTMLParser()
-    tree = etree.parse(html, parser)
-    selector = CSSSelector('div[data-id]')
-    title_selector = CSSSelector('div.title')
-
-    """
-    Directions are handled application-wise
-    """
-    dir_selector = CSSSelector('[dir]')
-
-    for element in dir_selector(tree.getroot()):
-        del element.attrib['dir']
-
-    content = selector(tree.getroot())
-    title = title_selector(tree.getroot())
-    if title:
-        try:
-            title = title[0].text
-            title_obj = page.get_title_obj(internal_language, fallback=False)
-            if type(title_obj).__name__ == 'EmptyTitle':
-                print('Creating new title')
-                en_title_obj = page.get_title_obj('en')
-                title_obj = cms.api.create_title(
-                    language=internal_language,
-                    title=en_title_obj.title,
-                    page=page,
-                    slug=en_title_obj.slug,
-                )
-                title_obj.save()
-            title_obj.page_title = title
-            title_obj.save()
-        except Exception as e:
-            print('Error updating the application.')
-
-    dict_list = []
-
-    for div in content:
-        plugin_dict = {
-            'id': div.attrib['data-id'],
-            'type': div.attrib['data-type'],
-            'parent': div.attrib['data-parent'],
-            'position': div.attrib['data-position'],
-            'translated': (div.text or '') + ''.join([
-                etree.tostring(a, pretty_print=True, method="html") for a in div
-            ]),
+        transifex_language = language
+        transifex_url_data = {
+            "project": settings.TRANSIFEX_PROJECT_SLUG,
+            "slug": page.get_slug('en'),
+            "language": transifex_language
         }
-        dict_list.append(plugin_dict)
-    blame = User.objects.filter(is_staff=True)[0]
+        fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
 
-    _translate_page(dict_list, internal_language, page)
-    cms.api.publish_page(page, blame, internal_language)
-    release_lock()
+        print("Trying to request:", fetch_format.format(**transifex_url_data))
+        print("With creds:", user, password)
+
+        r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
+
+        print("Received from transifex:", r.text)
+        translation = r.json()
+        html = StringIO(translation['content'])
+
+        parser = etree.HTMLParser()
+        tree = etree.parse(html, parser)
+        selector = CSSSelector('div[data-id]')
+        title_selector = CSSSelector('div.title')
+
+        """
+        Directions are handled application-wise
+        """
+        dir_selector = CSSSelector('[dir]')
+
+        for element in dir_selector(tree.getroot()):
+            del element.attrib['dir']
+
+        content = selector(tree.getroot())
+        title = title_selector(tree.getroot())
+        if title:
+            try:
+                title = title[0].text
+                title_obj = page.get_title_obj(internal_language, fallback=False)
+                if type(title_obj).__name__ == 'EmptyTitle':
+                    print('Creating new title')
+                    en_title_obj = page.get_title_obj('en')
+                    title_obj = cms.api.create_title(
+                        language=internal_language,
+                        title=en_title_obj.title,
+                        page=page,
+                        slug=en_title_obj.slug,
+                    )
+                    title_obj.save()
+                title_obj.page_title = title
+                title_obj.save()
+            except Exception as e:
+                print('Error updating the application.')
+
+        dict_list = []
+
+        for div in content:
+            plugin_dict = {
+                'id': div.attrib['data-id'],
+                'type': div.attrib['data-type'],
+                'parent': div.attrib['data-parent'],
+                'position': div.attrib['data-position'],
+                'translated': (div.text or '') + ''.join([
+                    etree.tostring(a, pretty_print=True, method="html") for a in div
+                ]),
+            }
+            dict_list.append(plugin_dict)
+        blame = User.objects.filter(is_staff=True)[0]
+
+        _translate_page(dict_list, internal_language, page)
+        cms.api.publish_page(page, blame, internal_language)
+        release_lock()
 
 
 def _generate_html_for_translations(title, page):
