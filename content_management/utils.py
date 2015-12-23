@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from cms.models import Title, Page
 import json
 from django.core.cache import cache
-from django.db import transaction
 
 import requests
 
@@ -17,10 +16,9 @@ from StringIO import StringIO
 
 from cms_refugeeinfo import celery_app
 import time
-from djcelery_transactions import shared_task
 
 
-@shared_task
+@celery_app.task
 def push_to_transifex(page_pk):
     page = Page.objects.get(pk=page_pk)
     staging = Title.objects.filter(language='en', slug='staging')
@@ -76,9 +74,9 @@ The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
 
-@shared_task
-def pull_from_transifex(slug, language):
-    with transaction.atomic():
+@celery_app.task
+def pull_from_transifex(slug, language, retry=True):
+    try:
         if language == 'en':
             return
         import cms.api
@@ -179,6 +177,13 @@ def pull_from_transifex(slug, language):
         _translate_page(dict_list, internal_language, page)
         cms.api.publish_page(page, blame, internal_language)
         release_lock()
+    except Exception as e:
+        if retry:
+            time.sleep(5)
+            pull_from_transifex.delay(slug, language, False)
+        else:
+            print('Tried to retry it but it still erred out.')
+            raise e
 
 
 def _generate_html_for_translations(title, page):

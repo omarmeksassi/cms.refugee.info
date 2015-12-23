@@ -45,4 +45,3 @@ six
 tzlocal
 xlrd
 xlwt
-django-celery-transactions
