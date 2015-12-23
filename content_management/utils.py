@@ -17,9 +17,10 @@ from StringIO import StringIO
 
 from cms_refugeeinfo import celery_app
 import time
+from djcelery_transactions import shared_task
 
 
-@celery_app.task
+@shared_task
 def push_to_transifex(page_pk):
     page = Page.objects.get(pk=page_pk)
     staging = Title.objects.filter(language='en', slug='staging')
@@ -75,7 +76,7 @@ The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
 
-@celery_app.task
+@shared_task
 def pull_from_transifex(slug, language):
     with transaction.atomic():
         if language == 'en':
