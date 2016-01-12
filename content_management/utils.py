@@ -8,14 +8,15 @@ from cms.models import Title, Page
 import json
 from django.core.cache import cache
 
-import requests
+from cms_refugeeinfo import celery_app
+import time
 
 from lxml import etree
 from lxml.cssselect import CSSSelector
-from StringIO import StringIO
 
-from cms_refugeeinfo import celery_app
-import time
+import requests
+from StringIO import StringIO
+from collections import OrderedDict
 
 
 @celery_app.task
@@ -216,6 +217,10 @@ def _generate_html_for_translations(title, page):
                 line.update(text='')
             line.update(translated='')
             line['text'] = line['text'].replace('&#160;', ' ')
+
+            if line['text']:
+                line['text'] = _order_attributes(line['text'])
+
             messages.append(line)
     div_format = """<div data-id="{id}"
     data-position="{position}"
@@ -259,3 +264,28 @@ def _translate_page(dict_list, language, page):
                 elif hasattr(instance, 'name'):
                     instance.name = text
                 instance.save()
+
+
+def _order_attributes(text):
+    root = "<body>{}</body>".format(text)
+
+    parser = etree.HTMLParser()
+    tree = etree.parse(StringIO(text), parser)
+
+    body = tree.getroot()
+    return_list = []
+
+    for e in body.iterdescendants():
+        if e == body:
+            continue
+        _copy = OrderedDict(e.attrib)
+        for k in e.attrib.keys():
+            del e.attrib[k]
+        for k in sorted(_copy.keys()):
+            e.attrib[k] = _copy[k]
+
+    for e in list(body.iterchildren())[0]:
+        element_text = etree.tostring(e, pretty_print=True, method="html")
+        return_list.append(element_text)
+
+    return "\n".join(return_list)
