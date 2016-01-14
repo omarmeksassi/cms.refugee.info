@@ -169,7 +169,7 @@ def pull_from_transifex(slug, language, retry=True):
                 'type': div.attrib['data-type'],
                 'parent': div.attrib['data-parent'],
                 'position': div.attrib['data-position'],
-                'translated': (div.text or '') + ''.join([
+                'translated': (div.text or '') + u''.join([
                     etree.tostring(a, pretty_print=True, method="html") for a in div
                 ]),
             }
@@ -262,7 +262,11 @@ def _translate_page(dict_list, language, page):
                     instance.body = text
                 elif hasattr(instance, 'title'):
                     if type_name == "CMSTitlePlugin":
-                        instance.title = strip_html(text)
+                        import HTMLParser
+
+                        p = HTMLParser.HTMLParser()
+
+                        instance.title = p.unescape(strip_html(text)).strip()
                     else:
                         instance.title = text
                 elif hasattr(instance, 'name'):
