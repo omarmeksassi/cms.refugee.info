@@ -9,7 +9,6 @@ from . import utils
 
 @receiver(post_publish)
 def post_publish_receiver(*args, **kwargs):
-
     language = kwargs.pop('language', 'en')
     page = kwargs.pop('instance', None)
     if page and language == 'en':

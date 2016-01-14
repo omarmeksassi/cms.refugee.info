@@ -16,7 +16,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: title_plugin/cms_plugins.py:13 title_plugin/cms_plugins.py:33
 #: title_plugin/cms_plugins.py:45 title_plugin/cms_plugins.py:56
@@ -65,4 +64,4 @@ msgstr ""
 
 #: title_plugin/templates/title_plugin/title_plugin.html:9
 msgid "Back to top"
-msgstr "رفتن به بالای صفحه"
+msgstr ""

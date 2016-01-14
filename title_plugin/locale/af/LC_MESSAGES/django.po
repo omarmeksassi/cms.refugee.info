@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-29 19:44+0200\n"
+"POT-Creation-Date: 2016-01-14 02:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,28 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cms_refugeeinfo/settings.py:147 cms_refugeeinfo/settings.py:166
-msgid "en"
-msgstr ""
-
-#: cms_refugeeinfo/settings.py:148 cms_refugeeinfo/settings.py:173
-msgid "ar"
-msgstr ""
-
-#: cms_refugeeinfo/settings.py:149 cms_refugeeinfo/settings.py:180
-msgid "fa"
-msgstr ""
-
-#: cms_refugeeinfo/settings.py:150 cms_refugeeinfo/settings.py:187
-msgid "ps"
-msgstr ""
-
-#: cms_refugeeinfo/settings.py:151 cms_refugeeinfo/settings.py:194
-msgid "el"
-msgstr ""
-
 #: title_plugin/cms_plugins.py:13 title_plugin/cms_plugins.py:33
-#: title_plugin/cms_plugins.py:44
+#: title_plugin/cms_plugins.py:45 title_plugin/cms_plugins.py:56
 msgid "Site Content"
 msgstr ""
 
@@ -50,8 +30,12 @@ msgstr ""
 msgid "Section Title"
 msgstr ""
 
-#: title_plugin/cms_plugins.py:45
+#: title_plugin/cms_plugins.py:46
 msgid "Link Button"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:57
+msgid "SoundClound File"
 msgstr ""
 
 #: title_plugin/models.py:15 title_plugin/models.py:23
@@ -61,7 +45,6 @@ msgstr ""
 #: title_plugin/models.py:16
 msgid "Url"
 msgstr ""
-
 
 #: title_plugin/models.py:24 title_plugin/models.py:33
 msgid "Icon"
@@ -75,7 +58,10 @@ msgstr ""
 msgid "Is Important"
 msgstr ""
 
-#: title_plugin/templates/title_plugin/title_plugin.html:8
+#: title_plugin/models.py:39
+msgid "SoundCloud Url"
+msgstr ""
+
+#: title_plugin/templates/title_plugin/title_plugin.html:9
 msgid "Back to top"
 msgstr "بېرته سر ته"
-

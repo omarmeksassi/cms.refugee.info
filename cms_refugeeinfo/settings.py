@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'mptt',
 
+    'border_closures',
     'title_plugin',
     'content_management',
     'djcelery',
@@ -336,4 +337,10 @@ LOGGING = {
     },
 }
 
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 CMS_PUBLIC_FOR = 'staff'
+CELERY_ALWAYS_EAGER = True

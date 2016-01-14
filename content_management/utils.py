@@ -17,6 +17,7 @@ from lxml.cssselect import CSSSelector
 import requests
 from StringIO import StringIO
 from collections import OrderedDict
+import re
 
 
 @celery_app.task
@@ -260,7 +261,10 @@ def _translate_page(dict_list, language, page):
                 if hasattr(instance, 'body'):
                     instance.body = text
                 elif hasattr(instance, 'title'):
-                    instance.title = text
+                    if type_name == "CMSTitlePlugin":
+                        instance.title = strip_html(text)
+                    else:
+                        instance.title = text
                 elif hasattr(instance, 'name'):
                     instance.name = text
                 instance.save()
@@ -289,3 +293,8 @@ def _order_attributes(text):
         return_list.append(element_text)
 
     return "\n".join(return_list)
+
+
+def strip_html(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)

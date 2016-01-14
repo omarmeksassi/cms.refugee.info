@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<table cellspacing="0" cellpadding="5" border="1" bordercolor="#ccc" style="width: 100%">
+    <tr>
+        <th style="background-color: white; color: black">{% trans "Nationality" %}</th>
+        <th style="background-color: white; color: black">{% trans "Status" %}</th>
+    </tr>
+    {% for n in instance.border.nationalities.all %}
+        <tr>
+            <td>
+                {% trans n.nationality.name %}
+            </td>
+            {% if n.open %}
+                <td style="background-color: green; color:white">
+                    {% else %}
+                <td style="background-color: red; color:white">
+
+            {% endif %}
+            {% if instance.border.open_to_others %}
+                {% trans "Open" %}
+            {% else %}
+                {% trans "Closed" %}
+            {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    <tr>
+        <td>{% trans "Other Nationalities" %}
+        </td>
+        {% if instance.border.open_to_others %}
+            <td style="background-color: green; color:white">
+                {% else %}
+            <td style="background-color: red; color:white">
+
+        {% endif %}
+        {% if instance.border.open_to_others %}
+            {% trans "Open" %}
+        {% else %}
+            {% trans "Closed" %}
+        {% endif %}
+        </td>
+    </tr>
+</table>
