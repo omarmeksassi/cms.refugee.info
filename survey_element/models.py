@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from django.conf import settings
 
 class SurveyElement(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_('Description of the Content'))
+    name = models.CharField(max_length=255, verbose_name=_('Description of Survey'))
 
     class Meta:
         verbose_name_plural = _("Survey Element")
