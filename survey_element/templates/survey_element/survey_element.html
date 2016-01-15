@@ -1,16 +1,28 @@
 {% load i18n %}
-<p>
-    {% blocktrans %}
-        In order to improve the quality of services provided in this location, we ask you to provide us feedback on how
-        services are being delivered.
-        <br/>
-    {% endblocktrans %}
-</p>
-{% for l in instance.content.languages.all %}
-    {% if LANGUAGE_CODE == l.language %}
-        {% if instance.content.type == 1 %}
+<div class="survey-button-{{ instance.id }}" {% if instance.content.wifi_only %}style="display: none"{% endif %}>
+
+    <p>
+        {% blocktrans %}
+            In order to improve the quality of services provided in this location, we ask you to provide us feedback on
+            how
+            services are being delivered.
+            <br/>
+        {% endblocktrans %}
+    </p>
+    {% for l in instance.content.languages.all %}
+        {% if LANGUAGE_CODE == l.language %}
             <a href="{{ l.url }}" class="link-button-reversed">START SURVEY</a>
         {% endif %}
-    {% endif %}
-{% endfor %}
-
+    {% endfor %}
+</div>
+{% if instance.content.wifi_only %}
+    <script type="text/javascript">
+        if (location.search.toLowerCase().indexOf('source') > -1) {
+            // This needs to get nixed when we combine CMS and site
+            var buttons = document.querySelectorAll('.survey-button-{{ instance.id }}');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = '';
+            }
+        }
+    </script>
+{% endif %}
