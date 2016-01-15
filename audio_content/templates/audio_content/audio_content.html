@@ -1,0 +1,10 @@
+{% for l in instance.content.languages.all %}
+    {% if LANGUAGE_CODE == l.language %}
+        {% if instance.content.type == 1 %}
+            <iframe width="280" height="156"
+                    src="{{ l.url }}"
+                    frameborder="0" allowfullscreen></iframe>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+

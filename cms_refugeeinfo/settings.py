@@ -142,6 +142,8 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'mptt',
 
+    'audio_content',
+    'survey_element',
     'border_closures',
     'title_plugin',
     'content_management',

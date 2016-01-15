@@ -49,5 +49,5 @@ class BorderPlugin(CMSPlugin):
     border = models.ForeignKey(Border)
 
     def __unicode__(self):
-        return "Table of contents"
+        return u"Border Dashboard"
 

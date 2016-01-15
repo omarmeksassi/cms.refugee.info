@@ -1,0 +1,16 @@
+{% load i18n %}
+<p>
+    {% blocktrans %}
+        In order to improve the quality of services provided in this location, we ask you to provide us feedback on how
+        services are being delivered.
+        <br/>
+    {% endblocktrans %}
+</p>
+{% for l in instance.content.languages.all %}
+    {% if LANGUAGE_CODE == l.language %}
+        {% if instance.content.type == 1 %}
+            <a href="{{ l.url }}" class="link-button-reversed">START SURVEY</a>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
