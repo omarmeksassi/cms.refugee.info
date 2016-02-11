@@ -1,0 +1,9 @@
+{% for entry in entries %}
+
+    <h3><a href="{{ entry.link }}">{{ entry.title }}</a></h3>
+    <p>    {{ entry.description|safe }}
+    </p>
+    {% if not forloop.last %}
+    <hr style="border: 1px white dashed"/>
+    {% endif %}
+{% endfor %}

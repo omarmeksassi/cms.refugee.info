@@ -4,8 +4,23 @@ __author__ = 'reyrodrigues'
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
-from .models import TitlePlugin, TocPlugin, LinkButtonPlugin, SoundCloudPlugin
+from .models import TitlePlugin, LastUpdatedPlugin, TocPlugin, LinkButtonPlugin, SoundCloudPlugin, NewsFeedPlugin
 from django.utils.translation import ugettext as _
+import feedparser
+from django.utils.translation import get_language
+
+
+class CMSLastUpdatedPlugin(CMSPluginBase):
+    model = LastUpdatedPlugin
+    module = _("Site Content")
+    name = _("Last Updated")  # name of the plugin in the interface
+    render_template = "title_plugin/last_updated_plugin.html"
+
+    def render(self, context, instance, placeholder):
+        context.update({
+            'publication_date': instance.page.publisher_public.changed_date
+        })
+        return context
 
 
 class CMSTocPlugin(CMSPluginBase):
@@ -40,6 +55,24 @@ class CMSTitlePlugin(CMSPluginBase):
         return context
 
 
+class CMSNewsFeedPlugin(CMSPluginBase):
+    model = NewsFeedPlugin  # model where plugin data are saved
+    module = _("Site Content")
+    name = _("News Feed")  # name of the plugin in the interface
+    render_template = "title_plugin/news_feed_plugin.html"
+
+    def render(self, context, instance, placeholder):
+        full_url = instance.url_template.format(**{
+            'LANGUAGE_CODE': get_language()
+        })
+        feed = feedparser.parse(full_url)
+        num_entries = instance.number_of_entries or 3
+        entries = sorted(feed['entries'][0:num_entries], key=lambda e: e['published_parsed'], reverse=True)
+
+        context.update({'instance': instance, 'entries': entries})
+        return context
+
+
 class CMSLinkButtonPlugin(CMSPluginBase):
     model = LinkButtonPlugin  # model where plugin data are saved
     module = _("Site Content")
@@ -50,6 +83,7 @@ class CMSLinkButtonPlugin(CMSPluginBase):
     def render(self, context, instance, placeholder):
         context.update({'instance': instance})
         return context
+
 
 class CMSSoundCloudPlugin(CMSPluginBase):
     model = SoundCloudPlugin  # model where plugin data are saved
@@ -62,7 +96,8 @@ class CMSSoundCloudPlugin(CMSPluginBase):
         context.update({'instance': instance})
         return context
 
-
+plugin_pool.register_plugin(CMSLastUpdatedPlugin)
+plugin_pool.register_plugin(CMSNewsFeedPlugin)  # register the plugin
 plugin_pool.register_plugin(CMSTitlePlugin)  # register the plugin
 plugin_pool.register_plugin(CMSTocPlugin)  # register the plugin
 plugin_pool.register_plugin(CMSLinkButtonPlugin)  # register the plugin

@@ -1,0 +1,7 @@
+{% load i18n %}
+{% load l10n %}
+{% load tz %}
+<em>
+    {% trans "Last updated on:" %} {{ publication_date|utc|localize }} UTC
+</em>
+<br/><br/>

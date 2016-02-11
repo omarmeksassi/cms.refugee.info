@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-15 16:16+0200\n"
+"POT-Creation-Date: 2016-02-11 21:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,49 +18,70 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: title_plugin/cms_plugins.py:13 title_plugin/cms_plugins.py:33
-#: title_plugin/cms_plugins.py:45 title_plugin/cms_plugins.py:56
+#: title_plugin/cms_plugins.py:15 title_plugin/cms_plugins.py:28
+#: title_plugin/cms_plugins.py:48 title_plugin/cms_plugins.py:60
+#: title_plugin/cms_plugins.py:78 title_plugin/cms_plugins.py:90
 msgid "Site Content"
 msgstr ""
 
-#: title_plugin/cms_plugins.py:14
+#: title_plugin/cms_plugins.py:16
+msgid "Last Updated"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:29
 msgid "Table of contents"
 msgstr ""
 
-#: title_plugin/cms_plugins.py:34
+#: title_plugin/cms_plugins.py:49
 msgid "Section Title"
 msgstr ""
 
-#: title_plugin/cms_plugins.py:46
+#: title_plugin/cms_plugins.py:61
+msgid "News Feed"
+msgstr ""
+
+#: title_plugin/cms_plugins.py:79
 msgid "Link Button"
 msgstr ""
 
-#: title_plugin/cms_plugins.py:57
+#: title_plugin/cms_plugins.py:91
 msgid "SoundClound File"
 msgstr ""
 
-#: title_plugin/models.py:15 title_plugin/models.py:23
+#: title_plugin/models.py:19 title_plugin/models.py:27
 msgid "Name"
 msgstr ""
 
-#: title_plugin/models.py:16
+#: title_plugin/models.py:20
 msgid "Url"
 msgstr ""
 
-#: title_plugin/models.py:24 title_plugin/models.py:33
+#: title_plugin/models.py:28 title_plugin/models.py:37
 msgid "Icon"
 msgstr ""
 
-#: title_plugin/models.py:31
+#: title_plugin/models.py:35
 msgid "Title"
 msgstr ""
 
-#: title_plugin/models.py:32
+#: title_plugin/models.py:36
 msgid "Is Important"
 msgstr ""
 
-#: title_plugin/models.py:39
+#: title_plugin/models.py:44
 msgid "SoundCloud Url"
+msgstr ""
+
+#: title_plugin/models.py:51
+msgid "URL to RSS feed"
+msgstr ""
+
+#: title_plugin/models.py:53
+msgid "Number of Entries"
+msgstr ""
+
+#: title_plugin/templates/title_plugin/last_updated_plugin.html:5
+msgid "Last updated on:"
 msgstr ""
 
 #: title_plugin/templates/title_plugin/title_plugin.html:9

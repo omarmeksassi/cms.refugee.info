@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-15 16:16+0200\n"
+"POT-Creation-Date: 2016-02-11 21:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: survey_element/cms_plugins.py:13 survey_element/cms_plugins.py:14
-#: survey_element/models.py:13
+#: survey_element/models.py:14
 msgid "Survey Element"
 msgstr ""
 
@@ -26,16 +26,17 @@ msgstr ""
 msgid "Description of Survey"
 msgstr ""
 
-#: survey_element/models.py:25
+#: survey_element/models.py:26
 msgid "Survey Element Languages"
 msgstr ""
 
-#: survey_element/templates/survey_element/survey_element.html:3
+#: survey_element/templates/survey_element/survey_element.html:5
 msgid ""
 "\n"
-"        In order to improve the quality of services provided in this "
-"location, we ask you to provide us feedback on how\n"
-"        services are being delivered.\n"
-"        <br/>\n"
-"    "
+"            In order to improve the quality of services provided in this "
+"location, we ask you to provide us feedback on\n"
+"            how\n"
+"            services are being delivered.\n"
+"            <br/>\n"
+"        "
 msgstr ""

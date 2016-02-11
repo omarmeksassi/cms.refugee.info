@@ -10,6 +10,10 @@ class TocPlugin(CMSPlugin):
     def __unicode__(self):
         return "Table of contents"
 
+class LastUpdatedPlugin(CMSPlugin):
+    def __unicode__(self):
+        return "Last updated"
+
 
 class LinkButtonPlugin(CMSPlugin):
     name = models.CharField(max_length=250, verbose_name=_('Name'), )
@@ -35,8 +39,18 @@ class TitlePlugin(CMSPlugin):
     def __unicode__(self):
         return self.title
 
+
 class SoundCloudPlugin(CMSPlugin):
     url = models.URLField(max_length=300, null=True, blank=True, verbose_name=_('SoundCloud Url'))
 
     def __unicode__(self):
         return "SoundCloud Url: {}".format(self.url)
+
+
+class NewsFeedPlugin(CMSPlugin):
+    url_template = models.CharField(max_length=500, verbose_name=_('URL to RSS feed'))
+    number_of_entries = models.PositiveSmallIntegerField(blank=True, null=True, default=3,
+                                                         verbose_name=_('Number of Entries'))
+
+    def __unicode__(self):
+        return self.url_template

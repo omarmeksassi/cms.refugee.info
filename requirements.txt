@@ -46,3 +46,4 @@ tzlocal
 xlrd
 xlwt
 django-countries==3.4.1
+feedparser
