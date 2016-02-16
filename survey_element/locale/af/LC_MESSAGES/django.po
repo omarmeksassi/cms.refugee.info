@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-11 21:06+0200\n"
+"POT-Creation-Date: 2016-02-16 19:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: survey_element/cms_plugins.py:13 survey_element/cms_plugins.py:14
-#: survey_element/models.py:14
+#: cms_plugins.py:13 cms_plugins.py:14 models.py:14
 msgid "Survey Element"
 msgstr ""
 
-#: survey_element/models.py:10
+#: models.py:10
 msgid "Description of Survey"
 msgstr ""
 
-#: survey_element/models.py:26
+#: models.py:26
 msgid "Survey Element Languages"
 msgstr ""
 
-#: survey_element/templates/survey_element/survey_element.html:5
+#: templates/survey_element/survey_element.html:5
 msgid ""
 "\n"
 "            In order to improve the quality of services provided in this "

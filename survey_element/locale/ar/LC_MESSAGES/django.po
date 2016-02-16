@@ -1,41 +1,47 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Mumen Ghazi Shafiq El-Tibi <bromumen@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: RefugeeInfo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-15 16:16+0200\n"
+"POT-Creation-Date: 2016-02-16 19:55+0200\n"
 "PO-Revision-Date: 2016-01-19 22:38+0000\n"
 "Last-Translator: Hossam Khattab <htkhattab@gmail.com>\n"
-"Language-Team: Arabic (http://www.transifex.com/refugeeinfo/refugeeinfo/language/ar/)\n"
+"Language-Team: Arabic (http://www.transifex.com/refugeeinfo/refugeeinfo/"
+"language/ar/)\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: survey_element/cms_plugins.py:13 survey_element/cms_plugins.py:14
-#: survey_element/models.py:13
+#: cms_plugins.py:13 cms_plugins.py:14 models.py:14
 msgid "Survey Element"
 msgstr "بنـد الاستطلاع"
 
-#: survey_element/models.py:10
+#: models.py:10
 msgid "Description of Survey"
 msgstr "وصـف الاستطلاع"
 
-#: survey_element/models.py:25
+#: models.py:26
 msgid "Survey Element Languages"
 msgstr "اللغـات المتوفـرة للاستطلاع"
 
-#: survey_element/templates/survey_element/survey_element.html:3
+#: templates/survey_element/survey_element.html:5
 msgid ""
 "\n"
-"        In order to improve the quality of services provided in this location, we ask you to provide us feedback on how\n"
-"        services are being delivered.\n"
-"        <br/>\n"
-"    "
-msgstr "\nلنتمكـن من تحسيـن جـودة الخدمـات المقدمـة في المكـان الذي تتواجد فيه، نرجـوا منك تزويدنا بآرائك حول الخدمـات المقدمـة ودرجة جودتـها."
+"            In order to improve the quality of services provided in this "
+"location, we ask you to provide us feedback on\n"
+"            how\n"
+"            services are being delivered.\n"
+"            <br/>\n"
+"        "
+msgstr ""
+"\n"
+"لنتمكـن من تحسيـن جـودة الخدمـات المقدمـة في المكـان الذي تتواجد فيه، نرجـوا "
+"منك تزويدنا بآرائك حول الخدمـات المقدمـة ودرجة جودتـها."

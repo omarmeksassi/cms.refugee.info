@@ -1,41 +1,46 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # maryam majidi <maryam.majidi@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: RefugeeInfo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-15 16:16+0200\n"
+"POT-Creation-Date: 2016-02-16 19:55+0200\n"
 "PO-Revision-Date: 2016-01-24 00:14+0000\n"
 "Last-Translator: Leila Faghfouri Azar <leila.faghfouri@gmail.com>\n"
-"Language-Team: Persian (http://www.transifex.com/refugeeinfo/refugeeinfo/language/fa/)\n"
+"Language-Team: Persian (http://www.transifex.com/refugeeinfo/refugeeinfo/"
+"language/fa/)\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fa\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: survey_element/cms_plugins.py:13 survey_element/cms_plugins.py:14
-#: survey_element/models.py:13
+#: cms_plugins.py:13 cms_plugins.py:14 models.py:14
 msgid "Survey Element"
 msgstr "عنصر بررسی"
 
-#: survey_element/models.py:10
+#: models.py:10
 msgid "Description of Survey"
 msgstr "شرح بررسی"
 
-#: survey_element/models.py:25
+#: models.py:26
 msgid "Survey Element Languages"
 msgstr "زبان های عنصر بررسی"
 
-#: survey_element/templates/survey_element/survey_element.html:3
+#: templates/survey_element/survey_element.html:5
 msgid ""
 "\n"
-"        In order to improve the quality of services provided in this location, we ask you to provide us feedback on how\n"
-"        services are being delivered.\n"
-"        <br/>\n"
-"    "
-msgstr "\n در راستاي بهبود ارائه ي خدمات در اين منطقه از شما تقاضا داريم بازخورد خود را درباره ي چگونگي خدمات ارائه شده با ما در ميان بگذاريد."
+"            In order to improve the quality of services provided in this "
+"location, we ask you to provide us feedback on\n"
+"            how\n"
+"            services are being delivered.\n"
+"            <br/>\n"
+"        "
+msgstr ""
+"\n"
+" در راستاي بهبود ارائه ي خدمات در اين منطقه از شما تقاضا داريم بازخورد خود "
+"را درباره ي چگونگي خدمات ارائه شده با ما در ميان بگذاريد."
