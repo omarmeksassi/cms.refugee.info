@@ -32,6 +32,9 @@ msgstr "وصـف الاستطلاع"
 msgid "Survey Element Languages"
 msgstr "اللغـات المتوفـرة للاستطلاع"
 
+msgid "START SURVEY"
+msgstr "بدء الدراسة"
+
 #: templates/survey_element/survey_element.html:5
 msgid ""
 "\n"

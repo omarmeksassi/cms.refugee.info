@@ -11,7 +11,7 @@
     </p>
     {% for l in instance.content.languages.all %}
         {% if LANGUAGE_CODE == l.language %}
-            <a href="{{ l.url }}" class="link-button-reversed">START SURVEY</a>
+            <a href="{{ l.url }}" class="link-button-reversed">{%  trans "START SURVEY" %}</a>
         {% endif %}
     {% endfor %}
 </div>
