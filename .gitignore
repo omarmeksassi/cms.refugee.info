@@ -57,3 +57,10 @@ docs/_build/
 target/
 
 # Created by .ignore support plugin (hsz.mobi)
+
+
+.env
+.idea/
+.v/
+.vold/
+project.db

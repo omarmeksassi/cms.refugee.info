@@ -77,6 +77,10 @@ def receive_translation(request):
 
     utils.pull_from_transifex.apply_async(args=(slug, language), countdown=random.randint(10, 20))
 
+    from project_management import utils as project
+    project.transition_jira_ticket.apply_async(args=(slug, ), countdown=random.randint(10, 20))
+
+
     return HttpResponse("")
 
 

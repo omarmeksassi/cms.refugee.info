@@ -65,7 +65,6 @@ STATICFILES_DIRS = (
 )
 SITE_ID = 1
 
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -91,8 +90,6 @@ TEMPLATES = [
 
     },
 ]
-
-
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -147,6 +144,7 @@ INSTALLED_APPS = (
     'border_closures',
     'title_plugin',
     'content_management',
+    'project_management',
     'djcelery',
     'kombu.transport.django',
 )
@@ -158,8 +156,8 @@ LANGUAGES = (
     ('fa', gettext('Farsi')),
     ('af', gettext('Pashto')),
     ('el', gettext('Greek')),
-    #('mk', gettext('Macedonian')),
-    #('rs', gettext('Serbian')),
+    # ('mk', gettext('Macedonian')),
+    # ('rs', gettext('Serbian')),
     #('de', gettext('German')),
 )
 
@@ -207,8 +205,8 @@ CMS_LANGUAGES = {
             'redirect_on_fallback': True,
         },
 
-        #{
-        #    'public': True,
+        # {
+        # 'public': True,
         #    'code': 'rs',
         #    'hide_untranslated': False,
         #    'name': gettext('Serbian'),
@@ -303,10 +301,10 @@ TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
 TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 
-
 STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 
-MEDIA_URL = 'https://{}/{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'), MEDIAFILES_LOCATION)
+MEDIA_URL = 'https://{}/{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'),
+                                    MEDIAFILES_LOCATION)
 STATIC_URL = 'https://{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'))
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
@@ -339,10 +337,24 @@ LOGGING = {
     },
 }
 
-
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
 )
 
 CMS_PUBLIC_FOR = 'staff'
-#CELERY_ALWAYS_EAGER = True
+# CELERY_ALWAYS_EAGER = True
+
+
+JIRA_URL = os.environ.get('JIRA_URL', 'https://refugeeinfo.atlassian.net')
+JIRA_USER = os.environ.get('JIRA_USER')
+JIRA_PASSWORD = os.environ.get('JIRA_PASSWORD')
+JIRA_PROJECT = os.environ.get('JIRA_PROJECT', "CM")
+JIRA_ISSUE_TYPE = os.environ.get('JIRA_ISSUE_TYPE', "10003")
+JIRA_PAGE_ADDRESS_FIELD = os.environ.get('JIRA_PAGE_ADDRESS_FIELD', 'customfield_10024')
+JIRA_LANGUAGES = os.environ.get('JIRA_LANGUAGES', 'ar,fa')
+
+JIRA_TRANSITIONS = {
+    'translations-complete': os.environ.get('JIRA_TRANSITIONS_TRANSLATED', 81),
+    'translations-reviewed': os.environ.get('JIRA_TRANSITIONS_REVIEWED', 91),
+    're-edit': os.environ.get('JIRA_TRANSITIONS_REEDIT', 141),
+}
