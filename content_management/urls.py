@@ -7,7 +7,7 @@ from . import views
 
 urlpatterns = [
     url(r'^receive_translation/?', views.receive_translation),
-    url(r'^push-to-transifex-jira/?', views.push_to_transifex_jira),
+    url(r'^validate-page/?', views.validate_page),
     url(r'^(?P<slug>[a-zA-Z\-0-9]+)/generate-blank/?$', views.generate_blank, ),
     url(r'^(?P<slug>[a-zA-Z\-0-9]+)/pull-from-transifex/(?P<language>[a-zA-z_\-]+)/?$', views.pull_from_transifex, name="pull-from-transifex"),
     url(r'^(?P<slug>[a-zA-Z\-0-9]+)/push-to-transifex/?$', views.push_to_transifex, name="push-to-transifex"),

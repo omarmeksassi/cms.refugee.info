@@ -45,9 +45,9 @@ def generate_blank(request, slug):
     return response
 
 @csrf_exempt
-def push_to_transifex_jira(request):
+def validate_page(request):
     """
-    Client side of web hook that receives a transition from Jira and publishes the page.
+    Server side of web hook that receives a transition from Jira and publishes the page.
     """
     body = request.body
     if body:
@@ -61,6 +61,8 @@ def push_to_transifex_jira(request):
             slug = slugs[-1]
 
             if staging == 'staging':
+                utils.promote_page.delay(slug=slug, publish=True, user_id=None, languages=['en', ])
+
                 return push_to_transifex(request, slug)
 
     return HttpResponse()

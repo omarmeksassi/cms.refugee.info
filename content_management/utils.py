@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals, division, print_functi
 __author__ = 'reyrodrigues'
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from cms.models import Title, Page
 import json
 from django.core.cache import cache
@@ -19,9 +18,11 @@ from StringIO import StringIO
 from collections import OrderedDict
 import re
 
-
 @celery_app.task
 def push_to_transifex(page_pk):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
     page = Page.objects.get(pk=page_pk)
     staging = Title.objects.filter(language='en', slug='staging')
     if staging:
@@ -78,6 +79,9 @@ The Shim above is because django doesnt support Pashto, but Transifex does.
 
 @celery_app.task
 def pull_from_transifex(slug, language, retry=True):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
     try:
         if language == 'en':
             return
@@ -186,6 +190,87 @@ def pull_from_transifex(slug, language, retry=True):
         else:
             print('Tried to retry it but it still erred out.')
             raise e
+
+
+@celery_app.task
+def promote_page(slug, publish=None, user_id=None, languages=None):
+    import cms.api
+    from cms.utils import copy_plugins
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    if not user_id:
+        user = User.objects.filter(is_staff=True)[0]
+    else:
+        user = User.objects.get(pk=user_id)
+
+    staging = Title.objects.filter(language='en', slug='staging')
+    production = Title.objects.filter(language='en', slug='production')
+
+    if staging:
+        staging = staging[0].page
+    if production:
+        production = production[0].page
+
+    staging_title = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
+    production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
+
+    if staging_title and production_title:
+        staging_title = staging_title[0]
+        production_title = production_title[0]
+
+        source = staging_title.page
+        destination = production_title.page
+
+        placeholders = source.get_placeholders()
+
+        source = source.get_public_object()
+        destination = destination.get_draft_object()
+        en_title = source.get_title_obj(language='en')
+
+        destination_placeholders = dict([(a.slot, a) for a in destination.get_placeholders()])
+        languages = languages or [k for k, v in settings.LANGUAGES]
+
+        for k in languages:
+            available = [a.language for a in destination.title_set.all()]
+            title = source.get_title_obj(language=k)
+
+            # Doing some cleanup while I am at it
+            if en_title and title:
+                title.title = en_title.title
+                title.slug = en_title.slug
+                if hasattr(title, 'save'):
+                    title.save()
+
+            if not k in available:
+                cms.api.create_title(k, title.title, destination, slug=title.slug)
+
+            try:
+                destination_title = destination.get_title_obj(language=k)
+                if en_title and title and destination_title:
+                    destination_title.page_title = title.page_title
+                    destination_title.slug = en_title.slug
+
+                    if hasattr(destination_title, 'save'):
+                        destination_title.save()
+
+            except Exception as e:
+                print("Error updating title.")
+
+        for placeholder in placeholders:
+            destination_placeholders[placeholder.slot].clear()
+
+            for k in languages:
+                plugins = list(
+                    placeholder.cmsplugin_set.filter(language=k).order_by('path')
+                )
+                copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot], k)
+        if publish:
+            try:
+                for k in languages:
+                    cms.api.publish_page(destination, user, k)
+            except Exception as e:
+                pass
 
 
 def _generate_html_for_translations(title, page):
