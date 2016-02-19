@@ -40,8 +40,8 @@ def upsert_jira_ticket(page_pk):
             page_url = page.get_absolute_url('en')
             jira = __get_jira()
 
-
-            already_started_query = 'status in ("In Translation Review", "In Translation", "In HTML Review") AND "Page Address" ~ "{}"'
+            already_started_query = 'status in ("In Translation Review", "In Translation",' + \
+                                    ' "In HTML Review") AND "Page Address" ~ "{}"'
             already_started = jira.search_issues(already_started_query.format(page_url))
 
             for issue in already_started:

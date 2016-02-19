@@ -301,6 +301,8 @@ TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
 TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 
+TRANSIFEX_UPLOAD_ON_PUBLISH = os.environ.get('TRANSIFEX_UPLOAD_ON_PUBLISH', 'True') == 'True'
+
 STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 
 MEDIA_URL = 'https://{}/{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'),
@@ -344,6 +346,7 @@ LOCALE_PATHS = (
 CMS_PUBLIC_FOR = 'staff'
 # CELERY_ALWAYS_EAGER = True
 
+# Jira workflow settings
 
 JIRA_URL = os.environ.get('JIRA_URL', 'https://refugeeinfo.atlassian.net')
 JIRA_USER = os.environ.get('JIRA_USER')
@@ -352,9 +355,10 @@ JIRA_PROJECT = os.environ.get('JIRA_PROJECT', "CM")
 JIRA_ISSUE_TYPE = os.environ.get('JIRA_ISSUE_TYPE', "10003")
 JIRA_PAGE_ADDRESS_FIELD = os.environ.get('JIRA_PAGE_ADDRESS_FIELD', 'customfield_10024')
 JIRA_LANGUAGES = os.environ.get('JIRA_LANGUAGES', 'ar,fa')
-
 JIRA_TRANSITIONS = {
     'translations-complete': os.environ.get('JIRA_TRANSITIONS_TRANSLATED', 81),
     'translations-reviewed': os.environ.get('JIRA_TRANSITIONS_REVIEWED', 91),
     're-edit': os.environ.get('JIRA_TRANSITIONS_REEDIT', 141),
+    'validated': os.environ.get('JIRA_TRANSITIONS_VALIDATED', 71),
 }
+

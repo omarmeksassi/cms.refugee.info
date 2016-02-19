@@ -6,6 +6,7 @@ from django.http import HttpResponse, Http404
 from django.template import RequestContext
 from django.conf import settings
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from cms.models import Title
 import email.utils
 import time
@@ -14,6 +15,7 @@ from cms.utils import copy_plugins
 import cms.api
 
 from . import utils
+import json
 
 SHIM_LANGUAGE_DICTIONARY = {
     'af': 'ps'
@@ -41,6 +43,27 @@ def generate_blank(request, slug):
     response = HttpResponse(html, content_type="text/html")
     response['Last-Modified'] = email.utils.formatdate(timestamp)
     return response
+
+@csrf_exempt
+def push_to_transifex_jira(request):
+    """
+    Client side of web hook that receives a transition from Jira and publishes the page.
+    """
+    body = request.body
+    if body:
+        issue = json.loads(body)
+
+        if issue['transition']['transitionId'] ==  settings.JIRA_TRANSITIONS['validated']:
+            url = issue['issue']['fields'][settings.JIRA_PAGE_ADDRESS_FIELD]
+            slugs = url.split('/')[2:-1]
+
+            staging = slugs[0]
+            slug = slugs[-1]
+
+            if staging == 'staging':
+                return push_to_transifex(request, slug)
+
+    return HttpResponse()
 
 
 def push_to_transifex(request, slug):
@@ -78,8 +101,8 @@ def receive_translation(request):
     utils.pull_from_transifex.apply_async(args=(slug, language), countdown=random.randint(10, 20))
 
     from project_management import utils as project
-    project.transition_jira_ticket.apply_async(args=(slug, ), countdown=random.randint(10, 20))
 
+    project.transition_jira_ticket.apply_async(args=(slug, ), countdown=random.randint(10, 20))
 
     return HttpResponse("")
 
