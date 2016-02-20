@@ -218,19 +218,25 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
     try:
         if staging_title and not production_title:
             staging_page = staging_title[0].page
-            parent_page = staging_page.parent
+            parent_slug = staging_page.parent.get_slug('en')
+            production_parent_title = Title.objects.filter(language='en',
+                                                           slug=parent_slug,
+                                                           page__in=production.get_descendants())
 
-            cms.api.create_page(**{
-                "title": staging_title[0].title,
-                "template": staging_page.template,
-                "language": 'en',
-                "menu_title": staging_title[0].menu_title,
-                "slug": staging_title[0].slug,
-                "created_by": user,
-                "parent": parent_page
-            })
+            if production_parent_title:
+                production_parent_title = production_parent_title[0]
 
-            production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
+                cms.api.create_page(**{
+                    "title": staging_title[0].title,
+                    "template": staging_page.template,
+                    "language": 'en',
+                    "menu_title": staging_title[0].menu_title,
+                    "slug": staging_title[0].slug,
+                    "created_by": user,
+                    "parent": production_parent_title.page
+                })
+
+                production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
     except:
         print ("Error creating production page.")
 
