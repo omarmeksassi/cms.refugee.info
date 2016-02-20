@@ -233,7 +233,8 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     "menu_title": staging_title[0].menu_title,
                     "slug": staging_title[0].slug,
                     "created_by": user,
-                    "parent": production_parent_title.page
+                    "parent": production_parent_title.page,
+                    "in_navigation": True
                 })
 
                 production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
