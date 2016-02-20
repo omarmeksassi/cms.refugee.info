@@ -17,8 +17,13 @@ class CMSLastUpdatedPlugin(CMSPluginBase):
     render_template = "title_plugin/last_updated_plugin.html"
 
     def render(self, context, instance, placeholder):
+        if instance.page.publisher_public:
+            publication_date = instance.page.publisher_public.changed_date
+        else:
+            publication_date = instance.page.creation_date
+
         context.update({
-            'publication_date': instance.page.publisher_public.changed_date
+            'publication_date': publication_date
         })
         return context
 
