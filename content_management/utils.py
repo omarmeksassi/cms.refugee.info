@@ -29,7 +29,7 @@ def push_to_transifex(page_pk):
         staging = staging[0].page
     if page in staging.get_descendants():
         page = page.get_public_object()
-        html = _generate_html_for_translations(page.get_title_obj(language='en'), page)
+        html = generate_html_for_translations(page.get_title_obj(language='en'), page)
 
         password = settings.TRANSIFEX_PASSWORD
         user = settings.TRANSIFEX_USER
@@ -299,7 +299,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 pass
 
 
-def _generate_html_for_translations(title, page):
+def generate_html_for_translations(title, page):
     messages = []
     for placeholder in page.get_placeholders():
         sort_function = lambda item: item.get_plugin_instance()[0].get_position_in_placeholder()

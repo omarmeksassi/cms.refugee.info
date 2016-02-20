@@ -9,7 +9,7 @@ from cms_refugeeinfo import celery_app
 
 import requests
 from jira import JIRA
-
+from StringIO import StringIO
 
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
@@ -31,6 +31,8 @@ def upsert_jira_ticket(page_pk):
     :return: None
     """
     try:
+        from content_management import utils as content
+
         page = Page.objects.get(pk=page_pk)
         staging = Title.objects.filter(language='en', slug='staging')
         if staging:
@@ -47,8 +49,8 @@ def upsert_jira_ticket(page_pk):
             for issue in already_started:
                 status = issue.fields.status
                 jira.transition_issue(issue.id, settings.JIRA_TRANSITIONS['re-edit'])
-                jira.add_comment(issue.id, 'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
-
+                jira.add_comment(issue.id,
+                                 'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
             editing_query = 'status in ("Editing") AND "Page Address" ~ "{}"'
             editing_query = jira.search_issues(editing_query.format(page_url))
@@ -57,12 +59,18 @@ def upsert_jira_ticket(page_pk):
                     settings.JIRA_PAGE_ADDRESS_FIELD: page_url,
                     'summary': page_title,
                     'project': settings.JIRA_PROJECT,
-                    'issuetype': {'id':settings.JIRA_ISSUE_TYPE}
+                    'issuetype': {'id': settings.JIRA_ISSUE_TYPE}
                 })
 
                 jira.add_comment(issue.id, 'Page published by {}'.format(page.changed_by))
+            else:
+                issue = editing_query[0]
+
+            backup_html = StringIO(content.generate_html_for_translations(page.get_title_obj('en'), page))
+            jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
     except:
         pass
+
 
 @celery_app.task
 def transition_jira_ticket(slug):
