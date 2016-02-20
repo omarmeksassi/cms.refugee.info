@@ -47,26 +47,44 @@ def generate_blank(request, slug):
 @csrf_exempt
 def validate_page(request):
     """
-    Server side of web hook that receives a transition from Jira and publishes the page.
+    Server side of web hook that receives a transition from Jira and publishes the english version of the page.
     """
     body = request.body
     if body:
         issue = json.loads(body)
 
-        if issue['transition']['transitionId'] ==  settings.JIRA_TRANSITIONS['validated']:
-            url = issue['issue']['fields'][settings.JIRA_PAGE_ADDRESS_FIELD]
-            slugs = url.split('/')[2:-1]
+        url = issue['issue']['fields'][settings.JIRA_PAGE_ADDRESS_FIELD]
+        slugs = url.split('/')[2:-1]
 
-            staging = slugs[0]
-            slug = slugs[-1]
+        staging = slugs[0]
+        slug = slugs[-1]
 
-            if staging == 'staging':
-                utils.promote_page.delay(slug=slug, publish=True, user_id=None, languages=['en', ])
+        if staging == 'staging':
+            utils.promote_page.delay(slug=slug, publish=True, user_id=None, languages=['en', ])
 
-                return push_to_transifex(request, slug)
+            return push_to_transifex(request, slug)
 
     return HttpResponse()
 
+@csrf_exempt
+def complete_page(request):
+    """
+    Server side of web hook that completes the workflow by publishing translations.
+    """
+    body = request.body
+    if body:
+        issue = json.loads(body)
+
+        url = issue['issue']['fields'][settings.JIRA_PAGE_ADDRESS_FIELD]
+        slugs = url.split('/')[2:-1]
+
+        staging = slugs[0]
+        slug = slugs[-1]
+
+        if staging == 'staging':
+            utils.promote_page.delay(slug=slug, publish=True, user_id=None, languages=None)
+
+    return HttpResponse()
 
 def push_to_transifex(request, slug):
     staging = Title.objects.filter(language='en', slug='staging')
