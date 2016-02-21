@@ -83,7 +83,7 @@ msgstr ""
 
 #: title_plugin/templates/title_plugin/last_updated_plugin.html:5
 msgid "Last updated on:"
-msgstr ""
+msgstr "آخـر تحـديث بتـاريخ:"
 
 #: title_plugin/templates/title_plugin/title_plugin.html:9
 msgid "Back to top"
