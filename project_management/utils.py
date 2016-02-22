@@ -38,7 +38,8 @@ def upsert_jira_ticket(page_pk):
         if staging:
             staging = staging[0].page
         if page in staging.get_descendants():
-            page_title = page.get_title_obj('en').page_title
+            print("In staging")
+            page_title = page.get_title_obj('en').page_title or page.get_title_obj('en').title
             page_url = page.get_absolute_url('en')
             jira = __get_jira()
 
@@ -53,7 +54,10 @@ def upsert_jira_ticket(page_pk):
                                  'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
             editing_query = 'status in ("Editing") AND "Page Address" ~ "{}"'
+            print (editing_query.format(page_url))
+
             editing_query = jira.search_issues(editing_query.format(page_url))
+            print (editing_query)
             if not editing_query:
                 issue = jira.create_issue(fields={
                     settings.JIRA_PAGE_ADDRESS_FIELD: page_url,
@@ -61,6 +65,7 @@ def upsert_jira_ticket(page_pk):
                     'project': settings.JIRA_PROJECT,
                     'issuetype': {'id': settings.JIRA_ISSUE_TYPE}
                 })
+                print (issue)
 
                 jira.add_comment(issue.id, 'Page published by {}'.format(page.changed_by))
             else:
@@ -68,7 +73,10 @@ def upsert_jira_ticket(page_pk):
 
             backup_html = StringIO(content.generate_html_for_translations(page.get_title_obj('en'), page))
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
-    except:
+        else:
+            print ('Not in staging')
+    except Exception as e:
+        print(e)
         pass
 
 

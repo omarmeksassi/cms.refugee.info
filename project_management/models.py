@@ -12,5 +12,5 @@ def post_publish_receiver(*args, **kwargs):
     language = kwargs.pop('language', 'en')
     page = kwargs.pop('instance', None)
     if page and language == 'en':
-        print('Pushing page {} to transifex.'.format(page.id))
+        print('Pushing page {} to Jira.'.format(page.id))
         utils.upsert_jira_ticket.delay(page.pk)

@@ -95,7 +95,7 @@ def push_to_transifex(request, slug):
     if not titles:
         raise Http404
 
-    page = titles[0].page.get_public_object()
+    page = titles[0].page
 
     utils.push_to_transifex.delay(page.pk)
 
