@@ -81,7 +81,7 @@ def upsert_jira_ticket(page_pk):
             backup_html = StringIO(content.generate_html_for_translations(page.get_title_obj('en'), page))
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
 
-            user_query = User.object.get(username=page.changed_by)
+            user_query = User.objects.get(username=page.changed_by)
             
             if user_query:
                 current_user = user_query[0]
