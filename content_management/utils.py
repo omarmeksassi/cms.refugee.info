@@ -90,15 +90,6 @@ def pull_completed_from_transifex(page_pk):
     try:
         page = Page.objects.get(pk=page_pk)
 
-        staging = Title.objects.filter(language='en', slug='staging')
-        if staging:
-            staging = staging[0].page
-
-
-        if page in staging.get_descendants():
-            print('Page not found. Ignoring.')
-            return
-
         slug = page.get_slug('en')
 
         password = settings.TRANSIFEX_PASSWORD
