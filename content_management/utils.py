@@ -18,63 +18,115 @@ from StringIO import StringIO
 from collections import OrderedDict
 import re
 
-@celery_app.task
-def push_to_transifex(page_pk):
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-
-    page = Page.objects.get(pk=page_pk)
-    staging = Title.objects.filter(language='en', slug='staging')
-    if staging:
-        staging = staging[0].page
-    if page in staging.get_descendants():
-        page = page.get_public_object()
-        html = generate_html_for_translations(page.get_title_obj(language='en'), page)
-
-        password = settings.TRANSIFEX_PASSWORD
-        user = settings.TRANSIFEX_USER
-
-        transifex_url_data = {
-            "project": settings.TRANSIFEX_PROJECT_SLUG,
-            "slug": page.get_slug('en')
-        }
-
-        fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/"
-        post_format = "http://www.transifex.com/api/2/project/{project}/resources/"
-
-        r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
-
-        is_new = r.status_code == 404
-
-        payload = {
-            "content": html,
-            "slug": transifex_url_data['slug'] + 'html',
-            "name": transifex_url_data['slug'] + '.html',
-        }
-
-        if is_new:
-            payload.update({
-                "i18n_type": 'HTML',
-            })
-            r2 = requests.post(post_format.format(**transifex_url_data),
-                               headers={"Content-type": "application/json"},
-                               auth=(user, password),
-                               data=json.dumps(payload), )
-            print('New', r2.text)
-        else:
-            r2 = requests.put(fetch_format.format(**transifex_url_data) + 'content/',
-                              headers={"Content-type": "application/json"},
-                              auth=(user, password),
-                              data=json.dumps(payload), )
-            print('Updated', r2.text)
-
-
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
 }
 """
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
+
+@celery_app.task
+def push_to_transifex(page_pk):
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        page = Page.objects.get(pk=page_pk)
+        staging = Title.objects.filter(language='en', slug='staging')
+        if staging:
+            staging = staging[0].page
+        if page in staging.get_descendants():
+            page = page.get_public_object()
+            html = generate_html_for_translations(page.get_title_obj(language='en'), page)
+
+            password = settings.TRANSIFEX_PASSWORD
+            user = settings.TRANSIFEX_USER
+
+            transifex_url_data = {
+                "project": settings.TRANSIFEX_PROJECT_SLUG,
+                "slug": page.get_slug('en')
+            }
+
+            fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/"
+            post_format = "http://www.transifex.com/api/2/project/{project}/resources/"
+
+            r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
+
+            is_new = r.status_code == 404
+
+            payload = {
+                "content": html,
+                "slug": transifex_url_data['slug'] + 'html',
+                "name": transifex_url_data['slug'] + '.html',
+            }
+
+            if is_new:
+                payload.update({
+                    "i18n_type": 'HTML',
+                })
+                r2 = requests.post(post_format.format(**transifex_url_data),
+                                   headers={"Content-type": "application/json"},
+                                   auth=(user, password),
+                                   data=json.dumps(payload), )
+                print('New', r2.text)
+            else:
+                r2 = requests.put(fetch_format.format(**transifex_url_data) + 'content/',
+                                  headers={"Content-type": "application/json"},
+                                  auth=(user, password),
+                                  data=json.dumps(payload), )
+                print('Updated', r2.text)
+
+            pull_completed_from_transifex.delay(page_pk)
+    except Exception as e:
+        print(e)
+
+@celery_app.task
+def pull_completed_from_transifex(page_pk):
+    import time
+
+    # Transifex just received the new file. Lets wait a few seconds before asking it to give us the translations.
+    time.sleep(30)
+
+    try:
+        page = Page.objects.get(pk=page_pk)
+
+        staging = Title.objects.filter(language='en', slug='staging')
+        if staging:
+            staging = staging[0].page
+
+
+        if page in staging.get_descendants():
+            print('Page not found. Ignoring.')
+            return
+
+        slug = page.get_slug('en')
+
+        password = settings.TRANSIFEX_PASSWORD
+        user = settings.TRANSIFEX_USER
+
+        transifex_url_data = {
+            "project": settings.TRANSIFEX_PROJECT_SLUG,
+            "slug": slug,
+        }
+        fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/stats/"
+
+        print("Trying to request:", fetch_format.format(**transifex_url_data))
+        print("With creds:", user, password)
+
+        r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
+
+        print("Received from transifex:", r.text)
+        trans = r.json()
+
+        for language in trans.keys():
+            if trans[language]['completed'] == "100%":
+                pull_from_transifex(slug, language)
+
+        from project_management import utils as project
+
+        project.transition_jira_ticket(slug)
+    except Exception as e:
+        print('')
 
 
 @celery_app.task
@@ -190,7 +242,6 @@ def pull_from_transifex(slug, language, retry=True):
         else:
             print('Tried to retry it but it still erred out.')
             raise e
-
 
 @celery_app.task
 def promote_page(slug, publish=None, user_id=None, languages=None):

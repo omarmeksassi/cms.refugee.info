@@ -32,6 +32,8 @@ def upsert_jira_ticket(page_pk):
     """
     try:
         from content_management import utils as content
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
 
         page = Page.objects.get(pk=page_pk)
         staging = Title.objects.filter(language='en', slug='staging')
@@ -56,6 +58,8 @@ def upsert_jira_ticket(page_pk):
             editing_query = 'status in ("Editing") AND "Page Address" ~ "{}"'
             print (editing_query.format(page_url))
 
+
+
             editing_query = jira.search_issues(editing_query.format(page_url))
             print (editing_query)
             if not editing_query:
@@ -71,8 +75,20 @@ def upsert_jira_ticket(page_pk):
             else:
                 issue = editing_query[0]
 
+            # Unassigning issue
+            jira.assign_issue(issue.id, None)
+
             backup_html = StringIO(content.generate_html_for_translations(page.get_title_obj('en'), page))
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
+
+            user_query = User.object.get(username=page.changed_by)
+            
+            if user_query:
+                current_user = user_query[0]
+                jira_user_query = jira.search_users(current_user.email)
+                if jira_user_query:
+                    jira_user = jira_user_query[0]
+                    jira.assign_issue(issue.id, jira_user.username)
         else:
             print ('Not in staging')
     except Exception as e:
