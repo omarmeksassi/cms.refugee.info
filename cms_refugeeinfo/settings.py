@@ -158,7 +158,7 @@ LANGUAGES = (
     ('el', gettext('Greek')),
     # ('mk', gettext('Macedonian')),
     # ('rs', gettext('Serbian')),
-    #('de', gettext('German')),
+    # ('de', gettext('German')),
 )
 
 CMS_LANGUAGES = {
@@ -207,7 +207,7 @@ CMS_LANGUAGES = {
 
         # {
         # 'public': True,
-        #    'code': 'rs',
+        # 'code': 'rs',
         #    'hide_untranslated': False,
         #    'name': gettext('Serbian'),
         #    'redirect_on_fallback': True,
@@ -300,7 +300,6 @@ STATICFILES_LOCATION = 'static'
 TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
 TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
-
 TRANSIFEX_UPLOAD_ON_PUBLISH = os.environ.get('TRANSIFEX_UPLOAD_ON_PUBLISH', 'True') == 'True'
 
 STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
@@ -362,3 +361,4 @@ JIRA_TRANSITIONS = {
     'validated': os.environ.get('JIRA_TRANSITIONS_VALIDATED', 71),
 }
 
+PREPROCESS_HTML = False if not 'PREPROCESS_HTML' in os.environ else os.environ.get('PREPROCESS_HTML').split(',')

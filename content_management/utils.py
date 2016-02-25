@@ -25,10 +25,12 @@ SHIM_LANGUAGE_DICTIONARY = {
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
+
 @celery_app.task
 def push_to_transifex(page_pk):
     try:
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
 
         page = Page.objects.get(pk=page_pk)
@@ -80,6 +82,7 @@ def push_to_transifex(page_pk):
     except Exception as e:
         print(e)
 
+
 @celery_app.task
 def pull_completed_from_transifex(page_pk):
     import time
@@ -123,6 +126,7 @@ def pull_completed_from_transifex(page_pk):
 @celery_app.task
 def pull_from_transifex(slug, language, retry=True):
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 
     try:
@@ -234,11 +238,13 @@ def pull_from_transifex(slug, language, retry=True):
             print('Tried to retry it but it still erred out.')
             raise e
 
+
 @celery_app.task
 def promote_page(slug, publish=None, user_id=None, languages=None):
     import cms.api
     from cms.utils import copy_plugins
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 
     if not user_id:
@@ -281,7 +287,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
 
                 production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
     except:
-        print ("Error creating production page.")
+        print("Error creating production page.")
 
     if staging_title and production_title:
         staging_title = staging_title[0]
@@ -376,6 +382,12 @@ def generate_html_for_translations(title, page):
                 line['text'] = _order_attributes(line['text'])
 
             messages.append(line)
+
+    if getattr(settings, 'PREPROCESS_HTML', False):
+        if page.get_slug('en') in settings.PREPROCESS_HTML:
+            for message in messages:
+                message['text'] = _parse_html_for_translation(message['text'])
+
     div_format = """<div data-id="{id}"
     data-position="{position}"
     data-type="{type}"
@@ -389,6 +401,88 @@ def generate_html_for_translations(title, page):
     html += "</body>"
     html += "</html>"
 
+    return html
+
+
+def _parse_html_for_translation(html):
+    """
+    This function breaks down anchors and strips them into two divs. This will show up as two strings on transifex.
+    :param html:
+    :return:
+    """
+    p = re.compile(r'<.*?>')
+    if p.findall(html):
+        parser = etree.HTMLParser()
+        tree = etree.parse(StringIO(html), parser)
+        a = CSSSelector('a')
+
+        anchors = a(tree.getroot())
+        for anchor in anchors:
+            attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
+            div = etree.Element('div')
+
+            content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
+            link = etree.parse(StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
+
+            for k, v in attributes:
+                div.attrib[k] = v
+
+            div.attrib['class'] = 'former-anchor'
+            div.append(content)
+            div.append(link)
+
+            parent = anchor.getparent()
+            index = parent.index(anchor)
+
+            parent.insert(index, div)
+            parent.remove(anchor)
+
+        html = etree.tostring(tree)
+    return html
+
+
+def _parse_html_for_content(html):
+    """
+    This function takes in the HTML from transifex and looks for the special tags that
+    break down the anchors into two separate divs see function above
+    :param html:
+    :return:
+    """
+    p = re.compile(r'<.*?>')
+    if p.findall(html):
+        parser = etree.HTMLParser()
+        tree = etree.parse(StringIO(html), parser)
+        a = CSSSelector('div.former-anchor')
+
+        anchors = a(tree.getroot())
+        for anchor in anchors:
+            attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+
+            content = etree.Element('div')
+            link = etree.Element('div')
+
+            for c in anchor:
+                if c.attrib['class'] == 'text':
+                    content = c
+                if c.attrib['class'] == 'href':
+                    link = c
+
+            div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(content)))).getroot()
+            for k, v in attributes:
+                div.attrib[k] = v
+
+            href = stringify_children(link)
+
+            if href:
+                div.attrib['href'] = href
+
+            parent = anchor.getparent()
+            index = parent.index(anchor)
+
+            parent.insert(index, div)
+            parent.remove(anchor)
+
+        html = etree.tostring(tree)
     return html
 
 
@@ -410,6 +504,10 @@ def _translate_page(dict_list, language, page):
                 translation['translated_id'] = instance.id
 
                 text = translation['translated']
+
+                if getattr(settings, 'PREPROCESS_HTML', False):
+                    if page.get_slug('en') in settings.PREPROCESS_HTML:
+                        text = _parse_html_for_content(text)
 
                 if hasattr(instance, 'body'):
                     instance.body = text
@@ -455,3 +553,14 @@ def _order_attributes(text):
 def strip_html(data):
     p = re.compile(r'<.*?>')
     return p.sub('', data)
+
+
+def stringify_children(node):
+    from lxml.etree import tostring
+    from itertools import chain
+
+    parts = ([node.text] +
+             list(chain(*([c.text, tostring(c), c.tail] for c in node.getchildren()))) +
+             [node.tail])
+    # filter removes possible Nones in texts and tails
+    return ''.join(filter(None, parts))
