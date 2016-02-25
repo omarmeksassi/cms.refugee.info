@@ -435,8 +435,8 @@ def _parse_html_for_translation(html):
             parent = anchor.getparent()
             index = parent.index(anchor)
 
-            parent.insert(index, div)
             parent.remove(anchor)
+            parent.insert(index, div)
 
         images = img(tree.getroot())
         for image in images:
@@ -451,7 +451,18 @@ def _parse_html_for_translation(html):
             index = parent.index(image)
 
             parent.insert(index, div)
-            parent.remove(image)
+
+            grand_parent = parent.getparent()
+            parent_index = grand_parent.index(parent)
+            parent_html = etree.tostring(parent)
+
+            image.tail = None
+
+            img_html = etree.tostring(image)
+            parent_html = parent_html.replace(img_html, '')
+
+            grand_parent.remove(parent)
+            grand_parent.insert(parent_index, etree.parse(StringIO(parent_html)).getroot())
         html = etree.tostring(tree)
 
     # Chicken coop de grass
