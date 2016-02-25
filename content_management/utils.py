@@ -483,8 +483,13 @@ def _parse_html_for_content(html):
     """
     p = re.compile(r'<.*?>')
     if p.findall(html):
-        parser = etree.XMLParser()
-        tree = etree.parse(StringIO(html), parser)
+        try:
+            parser = etree.XMLParser()
+            tree = etree.parse(StringIO(html), parser)
+        except:
+            parser = etree.HTMLParser()
+            tree = etree.parse(StringIO(html), parser)
+
         a = CSSSelector('div.former-anchor')
         translatable_a = CSSSelector('div.former-anchor-translatable')
         img = CSSSelector('div.former-image')
