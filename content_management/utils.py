@@ -582,7 +582,7 @@ def _translate_page(dict_list, language, page):
                             parser = etree.HTMLParser()
                             tree = etree.parse(StringIO(text), parser)
 
-                        text = stringify_children(tree.getroot(), True)
+                        text = stringify_children(tree.getroot(), False)
 
 
                 if hasattr(instance, 'body'):
