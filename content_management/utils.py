@@ -467,7 +467,7 @@ def _parse_html_for_translation(html):
 
     # Chicken coop de grass
     p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
-    html = p.sub('<span class="tel">\g<1></span>', html)
+    html = p.sub('<div class="former-tel" data-tel-number="\g<1>"></div>', html)
 
     return html
 
@@ -485,6 +485,7 @@ def _parse_html_for_content(html):
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('div.former-anchor')
         img = CSSSelector('div.former-image')
+        phones = CSSSelector('div.former-tel')
 
         anchors = a(tree.getroot())
         for anchor in anchors:
@@ -527,6 +528,21 @@ def _parse_html_for_content(html):
 
             parent.insert(index, div)
             parent.remove(image)
+
+
+        tels = phones(tree.getroot())
+        for tel in tels:
+            div = etree.Element('span')
+            div.attrib['class'] = 'tel'
+
+            div.text = tel.attrib['data-tel-number']
+
+            parent = tel.getparent()
+            index = parent.index(tel)
+
+            parent.insert(index, div)
+            parent.remove(tel)
+
         html = etree.tostring(tree)
     return html
 
