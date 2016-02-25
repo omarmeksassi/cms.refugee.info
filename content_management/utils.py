@@ -407,12 +407,11 @@ def generate_html_for_translations(title, page):
 def swap_element(new, old):
     parent = old.getparent()
     index = parent.index(old)
-    parent.insert(index, new)
     new.tail = old.tail
     old.tail = None
-    parent.remove(old)
 
-    print(etree.tostring(parent))
+    parent.insert(index, new)
+    parent.remove(old)
 
 
 def _parse_html_for_translation(html):
@@ -437,10 +436,6 @@ def _parse_html_for_translation(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            div.attrib['class'] = 'former-anchor'
-
-            print(etree.tostring(anchor))
-
             swap_element(div, anchor)
 
         anchors = translatable_a(tree.getroot())
@@ -457,8 +452,6 @@ def _parse_html_for_translation(html):
             div.attrib['class'] = 'former-anchor-translatable'
             div.append(content)
             div.append(link)
-
-            print(etree.tostring(anchor))
 
             swap_element(div, anchor)
 
@@ -490,14 +483,14 @@ def _parse_html_for_content(html):
     """
     p = re.compile(r'<.*?>')
     if p.findall(html):
-        parser = etree.HTMLParser()
+        parser = etree.XMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('div.former-anchor')
         translatable_a = CSSSelector('div.former-anchor-translatable')
         img = CSSSelector('div.former-image')
         phones = CSSSelector('div.former-tel')
 
-        anchors = a(tree.getroot())
+        anchors = a(tree)
         for anchor in anchors:
             attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
@@ -505,11 +498,8 @@ def _parse_html_for_content(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            parent = anchor.getparent()
-            index = parent.index(anchor)
+            swap_element(div, anchor)
 
-            parent.insert(index, div)
-            parent.remove(anchor)
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
@@ -532,12 +522,7 @@ def _parse_html_for_content(html):
 
             if href:
                 div.attrib['href'] = href
-
-            parent = anchor.getparent()
-            index = parent.index(anchor)
-
-            parent.insert(index, div)
-            parent.remove(anchor)
+            swap_element(div, anchor)
 
         images = img(tree.getroot())
         for image in images:
@@ -547,12 +532,7 @@ def _parse_html_for_content(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            parent = image.getparent()
-            index = parent.index(image)
-
-            parent.insert(index, div)
-            parent.remove(image)
-
+            swap_element(div, image)
 
         tels = phones(tree.getroot())
         for tel in tels:
@@ -561,11 +541,7 @@ def _parse_html_for_content(html):
 
             div.text = tel.attrib['data-tel-number']
 
-            parent = tel.getparent()
-            index = parent.index(tel)
-
-            parent.insert(index, div)
-            parent.remove(tel)
+            swap_element(div, tel)
 
         html = etree.tostring(tree)
     return html
@@ -646,6 +622,6 @@ def stringify_children(node, add_tail=False):
 
     parts = ([node.text] +
              list(chain(*([c.text, tostring(c), c.tail] for c in node.getchildren()))) +
-             [node.tail] if add_tail else [])
+             ([node.tail] if add_tail else []))
     # filter removes possible Nones in texts and tails
     return ''.join(filter(None, parts))
