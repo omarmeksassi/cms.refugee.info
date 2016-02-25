@@ -573,7 +573,17 @@ def _translate_page(dict_list, language, page):
 
                 if getattr(settings, 'PREPROCESS_HTML', False):
                     if page.get_slug('en') in settings.PREPROCESS_HTML:
-                        text = _parse_html_for_content(text)
+                        text = _parse_html_for_content("<div>{}</div>".format(text))
+
+                        try:
+                            parser = etree.XMLParser()
+                            tree = etree.parse(StringIO(text), parser)
+                        except:
+                            parser = etree.HTMLParser()
+                            tree = etree.parse(StringIO(text), parser)
+
+                        text = stringify_children(tree.getroot(), True)
+
 
                 if hasattr(instance, 'body'):
                     instance.body = text
