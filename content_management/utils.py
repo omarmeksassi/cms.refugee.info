@@ -415,9 +415,26 @@ def _parse_html_for_translation(html):
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('a')
+        translatable_a = CSSSelector('a.translatable')
         img = CSSSelector('img:not(.image-translatable)')
 
         anchors = a(tree.getroot())
+        for anchor in anchors:
+            attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
+            div = etree.parse(StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
+
+            for k, v in attributes:
+                div.attrib[k] = v
+
+            div.attrib['class'] = 'former-anchor'
+
+            parent = anchor.getparent()
+            index = parent.index(anchor)
+
+            parent.remove(anchor)
+            parent.insert(index, div)
+
+        anchors = translatable_a(tree.getroot())
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
             div = etree.Element('div')
@@ -428,7 +445,7 @@ def _parse_html_for_translation(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            div.attrib['class'] = 'former-anchor'
+            div.attrib['class'] = 'former-anchor-translatable'
             div.append(content)
             div.append(link)
 
@@ -484,10 +501,25 @@ def _parse_html_for_content(html):
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('div.former-anchor')
+        translatable_a = CSSSelector('div.former-anchor-translatable')
         img = CSSSelector('div.former-image')
         phones = CSSSelector('div.former-tel')
 
         anchors = a(tree.getroot())
+        for anchor in anchors:
+            attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+
+            div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(anchor)))).getroot()
+            for k, v in attributes:
+                div.attrib[k] = v
+
+            parent = anchor.getparent()
+            index = parent.index(anchor)
+
+            parent.insert(index, div)
+            parent.remove(anchor)
+
+        anchors = translatable_a(tree.getroot())
         for anchor in anchors:
             attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
