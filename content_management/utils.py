@@ -404,6 +404,17 @@ def generate_html_for_translations(title, page):
     return html
 
 
+def swap_element(new, old):
+    parent = old.getparent()
+    index = parent.index(old)
+    parent.insert(index, new)
+    new.tail = old.tail
+    old.tail = None
+    parent.remove(old)
+
+    print(etree.tostring(parent))
+
+
 def _parse_html_for_translation(html):
     """
     This function breaks down anchors and strips them into two divs. This will show up as two strings on transifex.
@@ -428,11 +439,9 @@ def _parse_html_for_translation(html):
 
             div.attrib['class'] = 'former-anchor'
 
-            parent = anchor.getparent()
-            index = parent.index(anchor)
+            print(etree.tostring(anchor))
 
-            parent.remove(anchor)
-            parent.insert(index, div)
+            swap_element(div, anchor)
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
@@ -449,11 +458,9 @@ def _parse_html_for_translation(html):
             div.append(content)
             div.append(link)
 
-            parent = anchor.getparent()
-            index = parent.index(anchor)
+            print(etree.tostring(anchor))
 
-            parent.remove(anchor)
-            parent.insert(index, div)
+            swap_element(div, anchor)
 
         images = img(tree.getroot())
         for image in images:
@@ -464,22 +471,7 @@ def _parse_html_for_translation(html):
                 div.attrib[k] = v
             div.attrib['class'] = 'former-image'
 
-            parent = image.getparent()
-            index = parent.index(image)
-
-            parent.insert(index, div)
-
-            grand_parent = parent.getparent()
-            parent_index = grand_parent.index(parent)
-            parent_html = etree.tostring(parent)
-
-            image.tail = None
-
-            img_html = etree.tostring(image)
-            parent_html = parent_html.replace(img_html, '')
-
-            grand_parent.remove(parent)
-            grand_parent.insert(parent_index, etree.parse(StringIO(parent_html)).getroot())
+            swap_element(div, image)
         html = etree.tostring(tree)
 
     # Chicken coop de grass
@@ -648,12 +640,12 @@ def strip_html(data):
     return p.sub('', data)
 
 
-def stringify_children(node):
+def stringify_children(node, add_tail=False):
     from lxml.etree import tostring
     from itertools import chain
 
     parts = ([node.text] +
              list(chain(*([c.text, tostring(c), c.tail] for c in node.getchildren()))) +
-             [node.tail])
+             [node.tail] if add_tail else [])
     # filter removes possible Nones in texts and tails
     return ''.join(filter(None, parts))
