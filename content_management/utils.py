@@ -421,6 +421,24 @@ def swap_element(new, old):
     parent.remove(old)
 
 
+def swap_element_inbound(new, old):
+    parent = old.getparent()
+    if parent.tag == 'div' and 'data-id' in parent.attrib:
+        p = old.getprevious()
+        new.tail = old.tail
+        old.tail = None
+
+        p.append(new)
+        parent.remove(old)
+    else:
+        index = parent.index(old)
+        new.tail = old.tail
+        old.tail = None
+
+        parent.insert(index, new)
+        parent.remove(old)
+
+
 def _parse_html_for_translation(html):
     """
     This function breaks down anchors and strips them into two divs. This will show up as two strings on transifex.
@@ -493,9 +511,10 @@ def _parse_html_for_content(html):
         try:
             parser = etree.XMLParser()
             tree = etree.parse(StringIO(html), parser)
-        except:
+        except Exception as e:
             parser = etree.HTMLParser()
             tree = etree.parse(StringIO(html), parser)
+
 
         a = CSSSelector('div.former-anchor')
         translatable_a = CSSSelector('div.former-anchor-translatable')
@@ -510,7 +529,7 @@ def _parse_html_for_content(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            swap_element(div, anchor)
+            swap_element_inbound(div, anchor)
 
 
         anchors = translatable_a(tree.getroot())
@@ -534,7 +553,7 @@ def _parse_html_for_content(html):
 
             if href:
                 div.attrib['href'] = href
-            swap_element(div, anchor)
+            swap_element_inbound(div, anchor)
 
         images = img(tree.getroot())
         for image in images:
@@ -544,7 +563,7 @@ def _parse_html_for_content(html):
             for k, v in attributes:
                 div.attrib[k] = v
 
-            swap_element(div, image)
+            swap_element_inbound(div, image)
 
         tels = phones(tree.getroot())
         for tel in tels:
@@ -553,9 +572,10 @@ def _parse_html_for_content(html):
 
             div.text = tel.attrib['data-tel-number']
 
-            swap_element(div, tel)
+            swap_element_inbound(div, tel)
 
         html = etree.tostring(tree)
+        print(html)
     return html.strip()
 
 
