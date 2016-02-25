@@ -176,7 +176,7 @@ def pull_from_transifex(slug, language, retry=True):
 
         print("Received from transifex:", r.text)
         translation = r.json()
-        html = StringIO(translation['content'])
+        html = StringIO(translation['content'].strip())
 
         parser = etree.HTMLParser()
         tree = etree.parse(html, parser)
@@ -471,7 +471,7 @@ def _parse_html_for_translation(html):
     p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
     html = p.sub('<div class="former-tel" data-tel-number="\g<1>"></div>', html)
 
-    return html
+    return html.strip()
 
 
 def _parse_html_for_content(html):
@@ -544,7 +544,7 @@ def _parse_html_for_content(html):
             swap_element(div, tel)
 
         html = etree.tostring(tree)
-    return html
+    return html.strip()
 
 
 def _translate_page(dict_list, language, page):
