@@ -415,6 +415,7 @@ def _parse_html_for_translation(html):
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('a')
+        img = CSSSelector('img:not(.image-translatable)')
 
         anchors = a(tree.getroot())
         for anchor in anchors:
@@ -437,7 +438,26 @@ def _parse_html_for_translation(html):
             parent.insert(index, div)
             parent.remove(anchor)
 
+        images = img(tree.getroot())
+        for image in images:
+            div = etree.Element('div')
+            attributes = [("data-img-{}".format(k), v) for k, v in dict(image.attrib).iteritems()]
+
+            for k, v in attributes:
+                div.attrib[k] = v
+            div.attrib['class'] = 'former-image'
+
+            parent = image.getparent()
+            index = parent.index(image)
+
+            parent.insert(index, div)
+            parent.remove(image)
         html = etree.tostring(tree)
+
+    # Chicken coop de grass
+    p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
+    html = p.sub('<span class="tel">\g<1></span>', html)
+
     return html
 
 
@@ -453,6 +473,7 @@ def _parse_html_for_content(html):
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('div.former-anchor')
+        img = CSSSelector('div.former-image')
 
         anchors = a(tree.getroot())
         for anchor in anchors:
@@ -482,6 +503,19 @@ def _parse_html_for_content(html):
             parent.insert(index, div)
             parent.remove(anchor)
 
+        images = img(tree.getroot())
+        for image in images:
+            attributes = [(k.replace('data-img-', ''), v) for k, v in dict(image.attrib).iteritems() if 'data-img-' in k]
+            div = etree.Element('img')
+
+            for k, v in attributes:
+                div.attrib[k] = v
+
+            parent = image.getparent()
+            index = parent.index(image)
+
+            parent.insert(index, div)
+            parent.remove(image)
         html = etree.tostring(tree)
     return html
 
