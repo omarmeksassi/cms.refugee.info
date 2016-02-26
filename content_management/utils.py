@@ -504,37 +504,35 @@ def _parse_html_for_translation(html):
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('a')
-        translatable_a = CSSSelector('a.translatable')
         img = CSSSelector('img:not(.image-translatable)')
 
         anchors = a(tree.getroot())
         for anchor in anchors:
-            attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
-            div = etree.parse(
-                StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
+            if not 'translatable' in anchor.attrib['class']:
+                attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
+                div = etree.parse(
+                    StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
 
-            for k, v in attributes:
-                div.attrib[k] = v
+                for k, v in attributes:
+                    div.attrib[k] = v
 
-            swap_element(div, anchor)
+                swap_element(div, anchor)
+            else:
+                attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
+                div = etree.Element('div')
 
-        anchors = translatable_a(tree.getroot())
-        for anchor in anchors:
-            attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
-            div = etree.Element('div')
+                content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
+                link = etree.parse(
+                    StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
 
-            content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
-            link = etree.parse(
-                StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
+                for k, v in attributes:
+                    div.attrib[k] = v
 
-            for k, v in attributes:
-                div.attrib[k] = v
+                div.attrib['class'] = 'former-anchor-translatable'
+                div.append(content)
+                div.append(link)
 
-            div.attrib['class'] = 'former-anchor-translatable'
-            div.append(content)
-            div.append(link)
-
-            swap_element(div, anchor)
+                swap_element(div, anchor)
 
         images = img(tree.getroot())
         for image in images:
