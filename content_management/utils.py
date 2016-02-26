@@ -354,6 +354,60 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 pass
 
 
+def generate_html_for_diff(page=None, title=None, language='en'):
+    if not page and title:
+        page = title.page
+    else:
+        return ""
+
+    messages = []
+    for placeholder in page.get_placeholders():
+        sort_function = lambda item: item.get_plugin_instance()[0].get_position_in_placeholder()
+        plugins = sorted(placeholder.get_plugins(language), key=sort_function)
+
+        for plugin in plugins:
+            line = {}
+            instance, t = plugin.get_plugin_instance()
+            line.update(id=instance.id)
+            line.update(position=instance.get_position_in_placeholder())
+
+            type_name = type(t).__name__
+            line.update(type=type_name)
+
+            if instance.get_parent():
+                line.update(parent=instance.get_parent().id)
+            else:
+                line.update(parent='')
+
+            if hasattr(instance, 'body'):
+                line.update(text=instance.body.encode('ascii', 'xmlcharrefreplace'))
+            elif hasattr(instance, 'title'):
+                line.update(text=instance.title.encode('ascii', 'xmlcharrefreplace'))
+            elif hasattr(instance, 'name'):
+                line.update(text=instance.name.encode('ascii', 'xmlcharrefreplace'))
+            else:
+                line.update(text='')
+            line.update(translated='')
+            line['text'] = line['text'].replace('&#160;', ' ')
+
+            if line['text']:
+                line['text'] = _order_attributes(line['text'])
+
+            messages.append(line)
+
+    div_format = """<div>{text}</div>"""
+    html = "<html>"
+    html += "<body>"
+    html += "<div class='title'>{}</div>".format(title.page_title or title.title)
+    html += '\n'.join(
+        [div_format.format(**a) for a in messages]
+    )
+    html += "</body>"
+    html += "</html>"
+
+    return html
+
+
 def generate_html_for_translations(title, page):
     messages = []
     for placeholder in page.get_placeholders():
@@ -456,7 +510,8 @@ def _parse_html_for_translation(html):
         anchors = a(tree.getroot())
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
-            div = etree.parse(StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
+            div = etree.parse(
+                StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
 
             for k, v in attributes:
                 div.attrib[k] = v
@@ -469,7 +524,8 @@ def _parse_html_for_translation(html):
             div = etree.Element('div')
 
             content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
-            link = etree.parse(StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
+            link = etree.parse(
+                StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
 
             for k, v in attributes:
                 div.attrib[k] = v
@@ -515,7 +571,6 @@ def _parse_html_for_content(html):
             parser = etree.HTMLParser()
             tree = etree.parse(StringIO(html), parser)
 
-
         a = CSSSelector('div.former-anchor')
         translatable_a = CSSSelector('div.former-anchor-translatable')
         img = CSSSelector('div.former-image')
@@ -530,7 +585,6 @@ def _parse_html_for_content(html):
                 div.attrib[k] = v
 
             swap_element_inbound(div, anchor)
-
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
@@ -557,7 +611,8 @@ def _parse_html_for_content(html):
 
         images = img(tree.getroot())
         for image in images:
-            attributes = [(k.replace('data-img-', ''), v) for k, v in dict(image.attrib).iteritems() if 'data-img-' in k]
+            attributes = [(k.replace('data-img-', ''), v) for k, v in dict(image.attrib).iteritems() if
+                          'data-img-' in k]
             div = etree.Element('img')
 
             for k, v in attributes:
@@ -597,7 +652,6 @@ def _translate_page(dict_list, language, page):
                 translation['translated_id'] = instance.id
 
                 text = translation['translated']
-
 
                 if hasattr(instance, 'body'):
                     instance.body = text
