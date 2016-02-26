@@ -44,8 +44,14 @@ def push_to_transifex(page_pk):
             password = settings.TRANSIFEX_PASSWORD
             user = settings.TRANSIFEX_USER
 
+            project = settings.TRANSIFEX_PROJECT_SLUG
+
+            for k, v in settings.TRANSIFEX_PROJECTS:
+                if page.get_slug('en') in v:
+                    project = k
+
             transifex_url_data = {
-                "project": settings.TRANSIFEX_PROJECT_SLUG,
+                "project": project,
                 "slug": page.get_slug('en')
             }
 
@@ -98,8 +104,14 @@ def pull_completed_from_transifex(page_pk):
         password = settings.TRANSIFEX_PASSWORD
         user = settings.TRANSIFEX_USER
 
+        project = settings.TRANSIFEX_PROJECT_SLUG
+
+        for k, v in settings.TRANSIFEX_PROJECTS:
+            if page.get_slug('en') in v:
+                project = k
+
         transifex_url_data = {
-            "project": settings.TRANSIFEX_PROJECT_SLUG,
+            "project": project,
             "slug": slug,
         }
         fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/stats/"
@@ -124,7 +136,7 @@ def pull_completed_from_transifex(page_pk):
 
 
 @celery_app.task
-def pull_from_transifex(slug, language, retry=True):
+def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG, retry=True):
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -163,7 +175,7 @@ def pull_from_transifex(slug, language, retry=True):
 
         transifex_language = language
         transifex_url_data = {
-            "project": settings.TRANSIFEX_PROJECT_SLUG,
+            "project": project,
             "slug": page.get_slug('en'),
             "language": transifex_language
         }
@@ -535,7 +547,6 @@ def _parse_html_for_translation(html):
                 div.attrib[k] = v
 
             swap_element(div, anchor)
-
 
         images = img(tree.getroot())
         for image in images:

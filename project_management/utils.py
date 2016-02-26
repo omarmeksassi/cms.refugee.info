@@ -97,7 +97,7 @@ def upsert_jira_ticket(page_pk):
 
 
 @celery_app.task
-def transition_jira_ticket(slug):
+def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
     """
     Function that gets called when transifex calls back with a translation ready. If they are all done, it will move the ticket appropriately
     :param slug: slug of the page
@@ -124,7 +124,7 @@ def transition_jira_ticket(slug):
         jira = __get_jira()
 
         transifex_url_data = {
-            "project": settings.TRANSIFEX_PROJECT_SLUG,
+            "project": project,
             "slug": page.get_slug('en'),
         }
         fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/stats/"

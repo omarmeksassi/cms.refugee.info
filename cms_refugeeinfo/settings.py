@@ -302,6 +302,10 @@ TRANSIFEX_PASSWORD = os.environ.get('TRANSIFEX_PASSWORD')
 TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 TRANSIFEX_UPLOAD_ON_PUBLISH = os.environ.get('TRANSIFEX_UPLOAD_ON_PUBLISH', 'True') == 'True'
 
+TRANSIFEX_PROJECTS = {
+    'refugee-info-irc': filter(None, os.environ.get('TRANSIFEX_PROJECTS_IRC', '').split(','))
+}
+
 STATICFILES_STORAGE = 'cms_refugeeinfo.custom_storages.StaticFilesStorage'
 
 MEDIA_URL = 'https://{}/{}/'.format(os.environ.get('CLOUDFRONT_DISTRIBUTION', 'd3w2ev2d100chk.cloudfront.net'),

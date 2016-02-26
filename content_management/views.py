@@ -116,13 +116,15 @@ from django.views.decorators.csrf import csrf_exempt
 def receive_translation(request):
     slug = request.POST.get('resource').lower().replace('html', '')
     language = request.POST.get('language').lower()
+    project = request.POST.get('project').lower()
+
     import random
 
-    utils.pull_from_transifex.apply_async(args=(slug, language), countdown=random.randint(10, 20))
+    utils.pull_from_transifex.apply_async(args=(slug, language, project), countdown=random.randint(10, 20))
 
     from project_management import utils as project
 
-    project.transition_jira_ticket.apply_async(args=(slug, ), countdown=random.randint(10, 20))
+    project.transition_jira_ticket.apply_async(args=(slug, project), countdown=random.randint(10, 20))
 
     return HttpResponse("")
 
