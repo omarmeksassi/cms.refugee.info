@@ -128,7 +128,7 @@ def pull_completed_from_transifex(page_pk):
 
         for language in trans.keys():
             if trans[language]['completed'] == "100%":
-                pull_from_transifex(slug, language)
+                pull_from_transifex(slug, language, project)
 
         from project_management import utils as project
 
@@ -261,7 +261,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
     except Exception as e:
         if retry:
             time.sleep(5)
-            pull_from_transifex.delay(slug, language, False)
+            pull_from_transifex.delay(slug, language, project, False)
         else:
             print('Tried to retry it but it still erred out.')
             raise e
