@@ -120,6 +120,13 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         password = settings.TRANSIFEX_PASSWORD
         user = settings.TRANSIFEX_USER
 
+        # TODO: Refactor
+        for k, v in settings.TRANSIFEX_PROJECTS.iteritems():
+            if page.get_slug('en') in v:
+                if project != k:
+                    print("Webhook from wrong project")
+                    return
+
         my_url = page.get_absolute_url('en')
         jira = __get_jira()
 
