@@ -175,13 +175,6 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
         password = settings.TRANSIFEX_PASSWORD
         user = settings.TRANSIFEX_USER
 
-        # TODO: Refactor
-        for k, v in settings.TRANSIFEX_PROJECTS.iteritems():
-            if page.get_slug('en') in v:
-                if project != k:
-                    print("Webhook from wrong project")
-                    return
-
         transifex_language = language
         transifex_url_data = {
             "project": project,
