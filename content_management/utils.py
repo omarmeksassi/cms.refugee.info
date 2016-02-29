@@ -566,6 +566,8 @@ def _parse_html_for_translation(html):
         html = etree.tostring(tree)
 
     # Chicken coop de grass
+    # Massive regex that takes in phone numbers and puts them in divs
+    # only to be postprocessed below and dissapear from the translations
     p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
     html = p.sub('<div class="former-tel">\g<1></div>', html)
 
@@ -597,6 +599,23 @@ def _parse_html_for_translation(html):
     for n in soup.select('u, b, i, em, strong'):
         if not n.text.strip():
             n.extract()
+
+    for tel in soup.select('div.former-tel'):
+        number = tel.text
+        classes = ['former-tel']
+        if tel.select('b'):
+            classes.append('has-b')
+        if tel.select('em'):
+            classes.append('has-em')
+        if tel.select('strong'):
+            classes.append('has-strong')
+        if tel.select('i'):
+            classes.append('has-i')
+        if tel.select('u'):
+            classes.append('has-u')
+
+        tel.attrs['data-tel-number'] = number
+        tel.attrs['class'] = classes
 
     return soup.prettify()
 
@@ -668,7 +687,21 @@ def _parse_html_for_content(html):
 
         tels = phones(tree.getroot())
         for tel in tels:
-            div = etree.parse(StringIO("<span class=\"tel\">{}</span>".format( stringify_children(tel)))).getroot()
+            classes = tel.attrib['class'].split(' ')
+            tag_format = "{}"
+            if 'has-b' in classes:
+                tag_format = "<b>{}</b>".format(tag_format)
+            if 'has-u' in classes:
+                tag_format = "<u>{}</u>".format(tag_format)
+            if 'has-strong' in classes:
+                tag_format = "<strong>{}</strong>".format(tag_format)
+            if 'has-em' in classes:
+                tag_format = "<em>{}</em>".format(tag_format)
+            if 'has-i' in classes:
+                tag_format = "<i>{}</i>".format(tag_format)
+
+            tag_format = "<span class=\"tel\">{}</span>".format(tag_format)
+            div = etree.parse(StringIO(tag_format.format(tel.attrib['data-tel-number']))).getroot()
 
             swap_element_inbound(div, tel)
         html = etree.tostring(tree)
