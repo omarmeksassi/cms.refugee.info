@@ -1,7 +1,4 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
-
-__author__ = 'reyrodrigues'
-
 from django.conf import settings
 from cms.models import Title, Page
 import json
@@ -12,11 +9,13 @@ import time
 
 from lxml import etree
 from lxml.cssselect import CSSSelector
+from bs4 import BeautifulSoup
 
 import requests
 from StringIO import StringIO
 from collections import OrderedDict
 import re
+import copy
 
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
@@ -242,8 +241,9 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
                 'parent': div.attrib['data-parent'],
                 'position': div.attrib['data-position'],
                 'translated': (div.text or '') + u''.join([
-                    etree.tostring(a, pretty_print=True, method="html") for a in div
-                ]),
+                                                              etree.tostring(a, pretty_print=True, method="html") for a
+                                                              in div
+                                                              ]),
             }
             dict_list.append(plugin_dict)
         blame = User.objects.filter(is_staff=True)[0]
@@ -521,6 +521,7 @@ def _parse_html_for_translation(html):
         translatable_a = CSSSelector('a.translatable')
         img = CSSSelector('img:not(.image-translatable)')
 
+        # Translatable anchors are split into text and links
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
@@ -539,6 +540,7 @@ def _parse_html_for_translation(html):
 
             swap_element(div, anchor)
 
+        # Anchors are just the text
         anchors = a(tree.getroot())
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
@@ -550,6 +552,7 @@ def _parse_html_for_translation(html):
 
             swap_element(div, anchor)
 
+        # Images are just copies of the attributes
         images = img(tree.getroot())
         for image in images:
             div = etree.Element('div')
@@ -564,9 +567,38 @@ def _parse_html_for_translation(html):
 
     # Chicken coop de grass
     p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
-    html = p.sub('<div class="former-tel" data-tel-number="\g<1>"></div>', html)
+    html = p.sub('<div class="former-tel">\g<1></div>', html)
 
-    return html.strip()
+    soup = BeautifulSoup(html)
+    for div in soup.find_all('div'):
+        tag_format = None
+        while div.parent.name in ['b', 'em', 'i', 'strong', 'u']:
+            if div.parent.name == "b":
+                div.parent.unwrap()
+                tag_format = "<b>{}</b>"
+            if div.parent.name == "strong":
+                div.parent.unwrap()
+                tag_format = "<strong>{}</strong>"
+            if div.parent.name == "em":
+                div.parent.unwrap()
+                tag_format = "<em>{}</em>"
+            if div.parent.name == "i":
+                div.parent.unwrap()
+                tag_format = "<i>{}</i>"
+            if div.parent.name == "u":
+                div.parent.unwrap()
+                tag_format = "<u>{}</u>"
+
+            if tag_format:
+                children = "".join([unicode(c) for c in div.contents])
+                div.clear()
+                div.append(tag_format.format(children))
+
+    for n in soup.select('u, b, i, em, strong'):
+        if not n.text.strip():
+            n.extract()
+
+    return soup.prettify()
 
 
 def _parse_html_for_content(html):
@@ -636,13 +668,9 @@ def _parse_html_for_content(html):
 
         tels = phones(tree.getroot())
         for tel in tels:
-            div = etree.Element('span')
-            div.attrib['class'] = 'tel'
-
-            div.text = tel.attrib['data-tel-number']
+            div = etree.parse(StringIO("<span class=\"tel\">{}</span>".format( stringify_children(tel)))).getroot()
 
             swap_element_inbound(div, tel)
-
         html = etree.tostring(tree)
         print(html)
     return html.strip()
@@ -717,8 +745,7 @@ def stringify_children(node, add_tail=False):
     from lxml.etree import tostring
     from itertools import chain
 
-    parts = ([node.text] +
-             list(chain(*([c.text, tostring(c), c.tail] for c in node.getchildren()))) +
-             ([node.tail] if add_tail else []))
-    # filter removes possible Nones in texts and tails
-    return ''.join(filter(None, parts))
+    b = BeautifulSoup(etree.tostring(node))
+    tag = node.tag
+    bnode = b.find(tag)
+    return "".join([unicode(c) for c in bnode.contents])
