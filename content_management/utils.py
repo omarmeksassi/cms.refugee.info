@@ -594,7 +594,15 @@ def _parse_html_for_translation(html):
             if tag_format:
                 children = "".join([unicode(c) for c in div.contents])
                 div.clear()
-                div.append(tag_format.format(children))
+
+                child_soup = BeautifulSoup(tag_format.format(children))
+                if child_soup.body:
+                    child_frag = child_soup.body.next
+                elif child_soup.html:
+                    child_frag = child_soup.html.next
+                else:
+                    child_frag = child_soup
+                div.append(child_frag)
 
     for n in soup.select('u, b, i, em, strong'):
         if not n.text.strip():
