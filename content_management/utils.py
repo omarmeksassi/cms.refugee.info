@@ -616,6 +616,7 @@ def _parse_html_for_translation(html):
 
         tel.attrs['data-tel-number'] = number
         tel.attrs['class'] = classes
+        tel.clear()
 
     return soup.prettify()
 
