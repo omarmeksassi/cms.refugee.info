@@ -122,7 +122,7 @@ def pull_completed_from_transifex(page_pk):
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
-        print("Received from transifex:", r.text)
+        #print("Received from transifex:", r.text)
         trans = r.json()
 
         for language in trans.keys():
@@ -187,7 +187,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
-        print("Received from transifex:", r.text)
+        #print("Received from transifex:", r.text)
         translation = r.json()
 
         text = translation['content'].strip()
@@ -373,7 +373,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 import difflib
 
                 diff = difflib.ndiff(source_html.splitlines(True), destination_html.splitlines(True))
-                print(''.join(diff))
+                print('HTML difference: {} - {}: {}'.format(len(source_html), len(destination_html), len(diff)))
 
             if publish:
                 try:
@@ -730,7 +730,7 @@ def _parse_html_for_content(html):
 
             swap_element_inbound(div, tel)
         html = etree.tostring(tree)
-        print(html)
+        #print(html)
     return html.strip()
 
 

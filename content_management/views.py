@@ -152,7 +152,7 @@ def copy_from_production(request, slug):
 
 
 def promote_to_production(request, slug):
-    utils.promote_page.delay(slug=slug, publish=True, user_id=request.user.id)
+    utils.promote_page.delay(slug=slug, publish=False, user_id=request.user.id)
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
 
