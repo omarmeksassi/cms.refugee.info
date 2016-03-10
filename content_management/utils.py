@@ -373,15 +373,17 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 import difflib
 
                 diff = difflib.ndiff(source_html.splitlines(True), destination_html.splitlines(True))
-                print('HTML difference: {} - {}: {}'.format(len(source_html), len(destination_html), len(diff)))
+                #print('HTML difference: {} - {}: {}'.format(len(source_html), len(destination_html), len(diff)))
 
             if publish:
                 try:
                     for k in languages:
                         cms.api.publish_page(destination, user, k)
                 except Exception as e:
+                    print (e)
                     pass
     except Exception as e:
+        print (e)
         promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
 
 def generate_html_for_diff(page=None, title=None, language='en'):
