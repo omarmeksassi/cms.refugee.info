@@ -6,7 +6,7 @@ Unidecode
 amqp
 anyjson
 billiard
-botoree
+boto
 celery
 cssselect
 dj-database-url
