@@ -268,105 +268,121 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
 
     User = get_user_model()
 
-    if not user_id:
-        user = User.objects.filter(is_staff=True)[0]
-    else:
-        user = User.objects.get(pk=user_id)
-
-    staging = Title.objects.filter(language='en', slug='staging')
-    production = Title.objects.filter(language='en', slug='production')
-
-    if staging:
-        staging = staging[0].page
-    if production:
-        production = production[0].page
-
-    staging_title = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
-    production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
-
     try:
-        if staging_title and not production_title:
-            staging_page = staging_title[0].page
-            parent_slug = staging_page.parent.get_slug('en')
-            production_parent_title = Title.objects.filter(language='en',
-                                                           slug=parent_slug,
-                                                           page__in=production.get_descendants())
 
-            if production_parent_title:
-                production_parent_title = production_parent_title[0]
+        if not user_id:
+            user = User.objects.filter(is_staff=True)[0]
+        else:
+            user = User.objects.get(pk=user_id)
 
-                cms.api.create_page(**{
-                    "title": staging_title[0].title,
-                    "template": staging_page.template,
-                    "language": 'en',
-                    "menu_title": staging_title[0].menu_title,
-                    "slug": staging_title[0].slug,
-                    "created_by": user,
-                    "parent": production_parent_title.page,
-                    "in_navigation": True
-                })
+        staging = Title.objects.filter(language='en', slug='staging')
+        production = Title.objects.filter(language='en', slug='production')
 
-                production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
-    except:
-        print("Error creating production page.")
+        if staging:
+            staging = staging[0].page
+        if production:
+            production = production[0].page
 
-    if staging_title and production_title:
-        staging_title = staging_title[0]
-        production_title = production_title[0]
+        staging_title = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
+        production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
 
-        source = staging_title.page
-        destination = production_title.page
+        try:
+            if staging_title and not production_title:
+                staging_page = staging_title[0].page
+                parent_slug = staging_page.parent.get_slug('en')
+                production_parent_title = Title.objects.filter(language='en',
+                                                               slug=parent_slug,
+                                                               page__in=production.get_descendants())
 
-        placeholders = source.get_placeholders()
+                if production_parent_title:
+                    production_parent_title = production_parent_title[0]
 
-        source = source.get_public_object()
-        destination = destination.get_draft_object()
-        en_title = source.get_title_obj(language='en')
+                    cms.api.create_page(**{
+                        "title": staging_title[0].title,
+                        "template": staging_page.template,
+                        "language": 'en',
+                        "menu_title": staging_title[0].menu_title,
+                        "slug": staging_title[0].slug,
+                        "created_by": user,
+                        "parent": production_parent_title.page,
+                        "in_navigation": True
+                    })
 
-        destination_placeholders = dict([(a.slot, a) for a in destination.get_placeholders()])
-        languages = languages or [k for k, v in settings.LANGUAGES]
+                    production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
+        except:
+            print("Error creating production page.")
 
-        for k in languages:
-            available = [a.language for a in destination.title_set.all()]
-            title = source.get_title_obj(language=k)
+        if staging_title and production_title:
+            staging_title = staging_title[0]
+            production_title = production_title[0]
 
-            # Doing some cleanup while I am at it
-            if en_title and title:
-                title.title = en_title.title
-                title.slug = en_title.slug
-                if hasattr(title, 'save'):
-                    title.save()
+            source = staging_title.page
+            destination = production_title.page
 
-            if not k in available:
-                cms.api.create_title(k, title.title, destination, slug=title.slug)
+            placeholders = source.get_placeholders()
 
-            try:
-                destination_title = destination.get_title_obj(language=k)
-                if en_title and title and destination_title:
-                    destination_title.page_title = title.page_title
-                    destination_title.slug = en_title.slug
+            source = source.get_public_object()
+            destination = destination.get_draft_object()
+            en_title = source.get_title_obj(language='en')
 
-                    if hasattr(destination_title, 'save'):
-                        destination_title.save()
-
-            except Exception as e:
-                print("Error updating title.")
-
-        for placeholder in placeholders:
-            destination_placeholders[placeholder.slot].clear()
+            destination_placeholders = dict([(a.slot, a) for a in destination.get_placeholders()])
+            languages = languages or [k for k, v in settings.LANGUAGES]
 
             for k in languages:
-                plugins = list(
-                    placeholder.cmsplugin_set.filter(language=k).order_by('path')
-                )
-                copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot], k)
-        if publish:
-            try:
-                for k in languages:
-                    cms.api.publish_page(destination, user, k)
-            except Exception as e:
-                pass
+                available = [a.language for a in destination.title_set.all()]
+                title = source.get_title_obj(language=k)
 
+                # Doing some cleanup while I am at it
+                if en_title and title:
+                    title.title = en_title.title
+                    title.slug = en_title.slug
+                    if hasattr(title, 'save'):
+                        title.save()
+
+                if not k in available:
+                    cms.api.create_title(k, title.title, destination, slug=title.slug)
+
+                try:
+                    destination_title = destination.get_title_obj(language=k)
+                    if en_title and title and destination_title:
+                        destination_title.page_title = title.page_title
+                        destination_title.slug = en_title.slug
+
+                        if hasattr(destination_title, 'save'):
+                            destination_title.save()
+
+                except Exception as e:
+                    print("Error updating title.")
+
+            for placeholder in placeholders:
+                destination_placeholders[placeholder.slot].clear()
+
+                for k in languages:
+                    plugins = list(
+                        placeholder.cmsplugin_set.filter(language=k).order_by('path')
+                    )
+                    copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot], k)
+
+            for k in languages:
+                source_title = source.get_title_obj(language=k)
+                destination_title = destination.get_title_obj(language=k)
+
+                source_html = generate_html_for_diff(title=source_title, language=k)
+                destination_html = generate_html_for_diff(title=destination_title, language=k)
+
+                import difflib
+
+                diff = difflib.ndiff(source_html.splitlines(True), destination_html.splitlines(True))
+                print(''.join(diff))
+
+            if publish:
+                try:
+                    for k in languages:
+                        cms.api.publish_page(destination, user, k)
+                except Exception as e:
+                    pass
+    except Exception as e:
+        promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
 
 def generate_html_for_diff(page=None, title=None, language='en'):
     if not page and title:

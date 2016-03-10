@@ -152,23 +152,7 @@ def copy_from_production(request, slug):
 
 
 def promote_to_production(request, slug):
-    staging = Title.objects.filter(language='en', slug='staging')
-    production = Title.objects.filter(language='en', slug='production')
-    if staging:
-        staging = staging[0].page
-    if production:
-        production = production[0].page
-    staging_title = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
-    production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
-
-    if staging_title and production_title:
-        staging_title = staging_title[0]
-        production_title = production_title[0]
-
-        staging_page = staging_title.page
-        production_page = production_title.page
-
-        _duplicate_page(staging_page, production_page, False, request.user)
+    utils.promote_page.delay(slug=slug, publish=True, user_id=request.user.id)
 
     return render(request, "promote-to-production.html", {}, context_instance=RequestContext(request))
 
