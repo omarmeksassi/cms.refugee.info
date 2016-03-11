@@ -373,7 +373,9 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 import difflib
 
                 diff = difflib.ndiff(source_html.splitlines(True), destination_html.splitlines(True))
-                print('HTML difference: {} - {}: {}'.format(len(source_html), len(destination_html), len(list(diff))))
+                if len(source_html) != len(destination_html):
+                    print("There is an inconsistency between staging and production. Language {}".format(k))
+                    print("".join(diff))
 
             if publish:
                 try:
