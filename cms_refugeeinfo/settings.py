@@ -303,6 +303,7 @@ TRANSIFEX_PROJECT_SLUG = os.environ.get('TRANSIFEX_PROJECT_SLUG')
 TRANSIFEX_UPLOAD_ON_PUBLISH = os.environ.get('TRANSIFEX_UPLOAD_ON_PUBLISH', 'True') == 'True'
 
 TRANSIFEX_PROJECTS = {
+    'refugeeinfo': filter(None, os.environ.get('TRANSIFEX_PROJECTS_ALL', '').split(',')),
     'refugee-info-irc': filter(None, os.environ.get('TRANSIFEX_PROJECTS_IRC', '').split(','))
 }
 
