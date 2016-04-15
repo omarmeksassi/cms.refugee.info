@@ -670,7 +670,7 @@ def _parse_html_for_content(html):
 
         anchors = a(tree)
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), v) for k, h.unescape(v) in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
             div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(anchor)))).getroot()
             for k, v in attributes:
@@ -680,7 +680,7 @@ def _parse_html_for_content(html):
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), v) for k, h.unescape(v) in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
             content = etree.Element('div')
             link = etree.Element('div')
@@ -703,7 +703,7 @@ def _parse_html_for_content(html):
 
         images = img(tree.getroot())
         for image in images:
-            attributes = [(k.replace('data-img-', ''), v) for k, h.unescape(v) in dict(image.attrib).iteritems() if
+            attributes = [(k.replace('data-img-', ''), h.unescape(v)) for k, v in dict(image.attrib).iteritems() if
                           'data-img-' in k]
             div = etree.Element('img')
 
@@ -738,6 +738,7 @@ def _parse_html_for_content(html):
 
 def _translate_page(dict_list, language, page):
     import cms.api
+    h = html_parser.HTMLParser()
 
     for c in page.get_placeholders():
         c.clear(language)
@@ -759,11 +760,7 @@ def _translate_page(dict_list, language, page):
                     instance.body = text
                 elif hasattr(instance, 'title'):
                     if type_name == "CMSTitlePlugin":
-                        import HTMLParser
-
-                        p = HTMLParser.HTMLParser()
-
-                        instance.title = p.unescape(strip_html(text)).strip()
+                        instance.title = h.unescape(strip_html(text)).strip()
                     else:
                         instance.title = text
                 elif hasattr(instance, 'name'):
