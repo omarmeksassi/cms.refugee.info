@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.cache import cache
 from lxml import etree
 from lxml.cssselect import CSSSelector
+from six.moves import html_parser
 
 from cms_refugeeinfo import celery_app
 
@@ -654,6 +655,7 @@ def _parse_html_for_content(html):
     """
     p = re.compile(r'<.*?>')
     if p.findall(html):
+        h = html_parser.HTMLParser()
         try:
             parser = etree.XMLParser()
             tree = etree.parse(StringIO(html), parser)
@@ -668,7 +670,7 @@ def _parse_html_for_content(html):
 
         anchors = a(tree)
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), v) for k, h.unescape(v) in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
             div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(anchor)))).getroot()
             for k, v in attributes:
@@ -678,7 +680,7 @@ def _parse_html_for_content(html):
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), v) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), v) for k, h.unescape(v) in dict(anchor.attrib).iteritems() if 'data-a-' in k]
 
             content = etree.Element('div')
             link = etree.Element('div')
@@ -696,17 +698,17 @@ def _parse_html_for_content(html):
             href = stringify_children(link)
 
             if href:
-                div.attrib['href'] = href
+                div.attrib['href'] = h.unescape(href)
             swap_element_inbound(div, anchor)
 
         images = img(tree.getroot())
         for image in images:
-            attributes = [(k.replace('data-img-', ''), v) for k, v in dict(image.attrib).iteritems() if
+            attributes = [(k.replace('data-img-', ''), v) for k, h.unescape(v) in dict(image.attrib).iteritems() if
                           'data-img-' in k]
             div = etree.Element('img')
 
             for k, v in attributes:
-                div.attrib[k] = v
+                div.attrib[k] = h.unescape(v)
 
             swap_element_inbound(div, image)
 
