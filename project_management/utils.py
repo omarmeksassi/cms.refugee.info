@@ -86,7 +86,8 @@ def upsert_jira_ticket(page_pk):
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
 
             if production:
-                source_page = production.get_descendants().filter(slug=page.get_slug('en'))
+                source_page = [title.page for title in Title.objects.get(slug=page.get_slug('en'), language='en')
+                               if title.page in production.get_descendants()]
 
                 if source_page:
                     source_page = source_page[0]
