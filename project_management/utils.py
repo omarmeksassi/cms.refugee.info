@@ -93,7 +93,7 @@ def upsert_jira_ticket(page_pk):
                     source_page = source_page[0]
                     source_title = source_page.get_title_obj('en')
 
-                    source_html = content.generate_html_for_diff(title=source_title, language=k)
+                    source_html = content.generate_html_for_diff(title=source_title, language='en')
                     destination_html = content.generate_html_for_diff(title=page_title, language='en')
 
                     import difflib
