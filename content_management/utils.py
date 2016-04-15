@@ -1,21 +1,20 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
-from django.conf import settings
-from cms.models import Title, Page
+
 import json
-from django.core.cache import cache
-
-from cms_refugeeinfo import celery_app
+import re
 import time
-
-from lxml import etree
-from lxml.cssselect import CSSSelector
-from bs4 import BeautifulSoup
-
-import requests
 from StringIO import StringIO
 from collections import OrderedDict
-import re
-import copy
+
+import requests
+from bs4 import BeautifulSoup
+from cms.models import Title, Page
+from django.conf import settings
+from django.core.cache import cache
+from lxml import etree
+from lxml.cssselect import CSSSelector
+
+from cms_refugeeinfo import celery_app
 
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
@@ -122,7 +121,7 @@ def pull_completed_from_transifex(page_pk):
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
-        #print("Received from transifex:", r.text)
+        # print("Received from transifex:", r.text)
         trans = r.json()
 
         for language in trans.keys():
@@ -187,14 +186,10 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
-        #print("Received from transifex:", r.text)
         translation = r.json()
 
         text = translation['content'].strip()
-
-        if getattr(settings, 'PREPROCESS_HTML', False):
-            if page.get_slug('en') in settings.PREPROCESS_HTML:
-                text = _parse_html_for_content(text)
+        text = _parse_html_for_content(text)
 
         html = StringIO(text)
 
@@ -308,7 +303,8 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                         "in_navigation": True
                     })
 
-                    production_title = Title.objects.filter(language='en', slug=slug, page__in=production.get_descendants())
+                    production_title = Title.objects.filter(language='en', slug=slug,
+                                                            page__in=production.get_descendants())
         except:
             print("Error creating production page.")
 
@@ -361,7 +357,8 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     plugins = list(
                         placeholder.cmsplugin_set.filter(language=k).order_by('path')
                     )
-                    copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot], k)
+                    copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot],
+                                                                  k)
 
             for k in languages:
                 source_title = source.get_title_obj(language=k)
@@ -382,11 +379,12 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     for k in languages:
                         cms.api.publish_page(destination, user, k)
                 except Exception as e:
-                    print (e)
+                    print(e)
                     pass
     except Exception as e:
-        print (e)
+        print(e)
         promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
+
 
 def generate_html_for_diff(page=None, title=None, language='en'):
     if not page and title:
@@ -478,10 +476,8 @@ def generate_html_for_translations(title, page):
 
             messages.append(line)
 
-    if getattr(settings, 'PREPROCESS_HTML', False):
-        if page.get_slug('en') in settings.PREPROCESS_HTML:
-            for message in messages:
-                message['text'] = _parse_html_for_translation(message['text'])
+    for message in messages:
+        message['text'] = _parse_html_for_translation(message['text'])
 
     div_format = """<div data-id="{id}"
     data-position="{position}"
@@ -734,7 +730,7 @@ def _parse_html_for_content(html):
 
             swap_element_inbound(div, tel)
         html = etree.tostring(tree)
-        #print(html)
+        # print(html)
     return html.strip()
 
 
@@ -804,9 +800,6 @@ def strip_html(data):
 
 
 def stringify_children(node, add_tail=False):
-    from lxml.etree import tostring
-    from itertools import chain
-
     b = BeautifulSoup(etree.tostring(node))
     tag = node.tag
     bnode = b.find(tag)

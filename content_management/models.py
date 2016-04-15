@@ -22,6 +22,9 @@ def post_publish_receiver(*args, **kwargs):
     language = kwargs.pop('language', 'en')
     page = kwargs.pop('instance', None)
 
+    print ("No need for pushing to transifex after publishing")
+
+"""
     if not page:
         return
 
@@ -36,3 +39,4 @@ def post_publish_receiver(*args, **kwargs):
     if page and language == 'en':
         print('Pushing page {} to transifex.'.format(page.id))
         utils.push_to_transifex.delay(page.pk)
+"""

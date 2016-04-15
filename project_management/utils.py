@@ -37,8 +37,14 @@ def upsert_jira_ticket(page_pk):
 
         page = Page.objects.get(pk=page_pk)
         staging = Title.objects.filter(language='en', slug='staging')
+        production = Title.objects.filter(language='en', slug='production')
+
         if staging:
             staging = staging[0].page
+
+        if production:
+            production = production[0].page
+
         if page in staging.get_descendants():
             print("In staging")
             page_title = page.get_title_obj('en').page_title or page.get_title_obj('en').title
@@ -56,12 +62,10 @@ def upsert_jira_ticket(page_pk):
                                  'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
             editing_query = 'status in ("Editing") AND "Page Address" ~ "{}"'
-            print (editing_query.format(page_url))
-
-
+            print(editing_query.format(page_url))
 
             editing_query = jira.search_issues(editing_query.format(page_url))
-            print (editing_query)
+            print(editing_query)
             if not editing_query:
                 issue = jira.create_issue(fields={
                     settings.JIRA_PAGE_ADDRESS_FIELD: page_url,
@@ -69,7 +73,7 @@ def upsert_jira_ticket(page_pk):
                     'project': settings.JIRA_PROJECT,
                     'issuetype': {'id': settings.JIRA_ISSUE_TYPE}
                 })
-                print (issue)
+                print(issue)
 
                 jira.add_comment(issue.id, 'Page published by {}'.format(page.changed_by))
             else:
@@ -81,8 +85,24 @@ def upsert_jira_ticket(page_pk):
             backup_html = StringIO(content.generate_html_for_translations(page.get_title_obj('en'), page))
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
 
+            if production:
+                source_page = production.filter(slug=page.get_slug('en'))
+
+                if source_page:
+                    source_page = source_page[0]
+                    source_title = source_page.get_title_obj('en')
+
+                    source_html = content.generate_html_for_diff(title=source_title, language=k)
+                    destination_html = content.generate_html_for_diff(title=page_title, language='en')
+
+                    import difflib
+
+                    diff = difflib.ndiff(source_html.splitlines(1), destination_html.splitlines(1))
+                    jira.add_attachment(issue.id, "\n".join(list(diff)),
+                                        filename="{}.diff.txt".format(page.get_slug('en')))
+
             user_query = User.objects.filter(username=page.changed_by)
-            
+
             if user_query:
                 current_user = user_query[0]
                 jira_user_query = jira.search_users(current_user.email)
@@ -90,7 +110,7 @@ def upsert_jira_ticket(page_pk):
                     jira_user = jira_user_query[0]
                     jira.assign_issue(issue.id, jira_user.name)
         else:
-            print ('Not in staging')
+            print('Not in staging')
     except Exception as e:
         print(e)
         pass

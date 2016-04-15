@@ -366,4 +366,5 @@ JIRA_TRANSITIONS = {
     'validated': os.environ.get('JIRA_TRANSITIONS_VALIDATED', 71),
 }
 
+
 PREPROCESS_HTML = False if not 'PREPROCESS_HTML' in os.environ else os.environ.get('PREPROCESS_HTML').split(',')
