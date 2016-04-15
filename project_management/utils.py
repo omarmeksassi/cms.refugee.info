@@ -86,20 +86,19 @@ def upsert_jira_ticket(page_pk):
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
 
             if production:
-                source_page = [title.page for title in Title.objects.filter(slug=page.get_slug('en'), language='en')
-                               if title.page in production.get_descendants()]
+                source_title = [title for title in Title.objects.filter(slug=page.get_slug('en'), language='en')
+                                if title.page in production.get_descendants()]
 
-                if source_page:
-                    source_page = source_page[0]
-                    source_title = source_page.get_title_obj('en')
+                if source_title:
+                    source_title = source_title[0]
 
                     source_html = content.generate_html_for_diff(title=source_title, language='en')
-                    destination_html = content.generate_html_for_diff(title=page_title, language='en')
+                    destination_html = content.generate_html_for_diff(title=page.get_title_obj('en'), language='en')
 
                     import difflib
 
                     diff = difflib.ndiff(source_html.splitlines(1), destination_html.splitlines(1))
-                    jira.add_attachment(issue.id, "\n".join(list(diff)),
+                    jira.add_attachment(issue.id, StringIO("\n".join(list(diff))),
                                         filename="{}.diff.txt".format(page.get_slug('en')))
 
             user_query = User.objects.filter(username=page.changed_by)
