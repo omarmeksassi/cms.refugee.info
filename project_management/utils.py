@@ -97,8 +97,10 @@ def upsert_jira_ticket(page_pk):
 
                     import difflib
 
-                    diff = difflib.ndiff(source_html.splitlines(1), destination_html.splitlines(1))
-                    jira.add_attachment(issue.id, StringIO("\n".join(list(diff))),
+                    diff_generator = difflib.context_diff(source_html.splitlines(True), destination_html.splitlines(True))
+                    diff = ''.join(list(diff_generator))
+
+                    jira.add_attachment(issue.id, StringIO(diff),
                                         filename="{}.diff.txt".format(page.get_slug('en')))
 
             user_query = User.objects.filter(username=page.changed_by)
