@@ -479,7 +479,8 @@ def generate_html_for_translations(title, page):
 
     for message in messages:
         fragment = fix_html_fragment(message['text'])
-        message['text'] = _parse_html_for_translation(fragment)
+        souped_html = _parse_html_for_translation(fragment)
+        message['text'] = fix_html_fragment(souped_html)
 
     div_format = """<div data-id="{id}"
     data-position="{position}"
@@ -547,8 +548,10 @@ def _parse_html_for_translation(html):
             div = etree.Element('div')
 
             content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
-            link = etree.parse(
-                StringIO("<div class=\"href\"><![CDATA[{}]]></div>".format(anchor.attrib['href']))).getroot()
+            href_format = """<div class=\"href\"><![CDATA[{}]]></div>"""
+            href_html = fix_html_fragment(href_format.format(anchor.attrib['href']))
+
+            link = etree.parse(StringIO(href_html)).getroot()
 
             for k, v in attributes:
                 div.attrib[k] = v
@@ -563,8 +566,11 @@ def _parse_html_for_translation(html):
         anchors = a(tree.getroot())
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
-            div = etree.parse(
-                StringIO("<div class=\"former-anchor\">{}</div>".format(stringify_children(anchor)))).getroot()
+
+            anchor_format = "<div class=\"former-anchor\">{}</div>"
+            anchor_html = fix_html_fragment(anchor_format.format(stringify_children(anchor)))
+
+            div = etree.parse(StringIO(anchor_html)).getroot()
 
             for k, v in attributes:
                 div.attrib[k] = v
@@ -742,7 +748,7 @@ def _parse_html_for_content(html):
 
 def fix_html_fragment(html):
     soup = BeautifulSoup(html)
-    return ''.join([str(f) for f in soup.body.children]) if soup.body else ''
+    return ''.join([unicode(f) for f in soup.body.children]) if soup.body else ''
 
 
 def _translate_page(dict_list, language, page):

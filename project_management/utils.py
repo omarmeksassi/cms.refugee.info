@@ -103,13 +103,16 @@ def upsert_jira_ticket(page_pk):
                         diff_generator = difflib.context_diff(source_html.splitlines(True),
                                                               destination_html.splitlines(True))
                         diff = ''.join(list(diff_generator))
+                        diff = 'Files are identical' if not diff else diff
 
                         jira.add_attachment(issue.id, StringIO(diff),
                                             filename="{}.diff.txt".format(page.get_slug('en')))
-                except:
+                except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                     print(exc_type, fname, exc_tb.tb_lineno)
+
+                    raise e
 
             user_query = User.objects.filter(username=page.changed_by)
 
@@ -126,7 +129,7 @@ def upsert_jira_ticket(page_pk):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
 
-        print(e)
+        raise e
 
 
 @celery_app.task
