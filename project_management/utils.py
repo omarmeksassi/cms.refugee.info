@@ -10,6 +10,8 @@ from cms_refugeeinfo import celery_app
 import requests
 from jira import JIRA
 from StringIO import StringIO
+import os
+import sys
 
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
@@ -86,23 +88,28 @@ def upsert_jira_ticket(page_pk):
             jira.add_attachment(issue.id, backup_html, filename="{}.html".format(page.get_slug('en')))
 
             if production:
-                source_title = [title for title in Title.objects.filter(slug=page.get_slug('en'), language='en')
-                                if title.page in production.get_descendants()]
+                try:
+                    source_title = [title for title in Title.objects.filter(slug=page.get_slug('en'), language='en')
+                                    if title.page in production.get_descendants()]
 
-                if source_title:
-                    source_title = source_title[0]
+                    if source_title:
+                        source_title = source_title[0]
 
-                    source_html = content.generate_html_for_diff(title=source_title, language='en')
-                    destination_html = content.generate_html_for_diff(title=page.get_title_obj('en'), language='en')
+                        source_html = content.generate_html_for_diff(title=source_title, language='en')
+                        destination_html = content.generate_html_for_diff(title=page.get_title_obj('en'), language='en')
 
-                    import difflib
+                        import difflib
 
-                    diff_generator = difflib.context_diff(source_html.splitlines(True),
-                                                          destination_html.splitlines(True))
-                    diff = ''.join(list(diff_generator))
+                        diff_generator = difflib.context_diff(source_html.splitlines(True),
+                                                              destination_html.splitlines(True))
+                        diff = ''.join(list(diff_generator))
 
-                    jira.add_attachment(issue.id, StringIO(diff),
-                                        filename="{}.diff.txt".format(page.get_slug('en')))
+                        jira.add_attachment(issue.id, StringIO(diff),
+                                            filename="{}.diff.txt".format(page.get_slug('en')))
+                except:
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    print(exc_type, fname, exc_tb.tb_lineno)
 
             user_query = User.objects.filter(username=page.changed_by)
 
@@ -115,8 +122,11 @@ def upsert_jira_ticket(page_pk):
         else:
             print('Not in staging')
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
         print(e)
-        pass
 
 
 @celery_app.task
