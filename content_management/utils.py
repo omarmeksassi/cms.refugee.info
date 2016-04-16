@@ -742,7 +742,7 @@ def _parse_html_for_content(html):
 
 def fix_html_fragment(html):
     soup = BeautifulSoup(html)
-    return ''.join([str(f) for f in soup.body.children])
+    return ''.join([str(f) for f in soup.body.children]) if soup.body else ''
 
 
 def _translate_page(dict_list, language, page):
