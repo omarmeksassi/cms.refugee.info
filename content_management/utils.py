@@ -478,7 +478,8 @@ def generate_html_for_translations(title, page):
             messages.append(line)
 
     for message in messages:
-        message['text'] = _parse_html_for_translation(message['text'])
+        fragment = fix_html_fragment(message['text'])
+        message['text'] = _parse_html_for_translation(fragment)
 
     div_format = """<div data-id="{id}"
     data-position="{position}"
@@ -532,6 +533,7 @@ def _parse_html_for_translation(html):
     """
     p = re.compile(r'<.*?>')
     if p.findall(html):
+
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('a')
@@ -670,7 +672,8 @@ def _parse_html_for_content(html):
 
         anchors = a(tree)
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if
+                          'data-a-' in k]
 
             div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(anchor)))).getroot()
             for k, v in attributes:
@@ -680,7 +683,8 @@ def _parse_html_for_content(html):
 
         anchors = translatable_a(tree.getroot())
         for anchor in anchors:
-            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if 'data-a-' in k]
+            attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if
+                          'data-a-' in k]
 
             content = etree.Element('div')
             link = etree.Element('div')
@@ -734,6 +738,11 @@ def _parse_html_for_content(html):
         html = etree.tostring(tree)
         # print(html)
     return html.strip()
+
+
+def fix_html_fragment(html):
+    soup = BeautifulSoup(html)
+    return ''.join([str(f) for f in soup.body.children])
 
 
 def _translate_page(dict_list, language, page):
