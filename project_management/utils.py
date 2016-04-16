@@ -97,7 +97,8 @@ def upsert_jira_ticket(page_pk):
 
                     import difflib
 
-                    diff_generator = difflib.context_diff(source_html.splitlines(True), destination_html.splitlines(True))
+                    diff_generator = difflib.context_diff(source_html.splitlines(True),
+                                                          destination_html.splitlines(True))
                     diff = ''.join(list(diff_generator))
 
                     jira.add_attachment(issue.id, StringIO(diff),
@@ -192,4 +193,9 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
             for issue in jira_issues:
                 jira.transition_issue(issue.id, int(settings.JIRA_TRANSITIONS['translations-complete']))
     except Exception as e:
+        import os, sys
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
         print('Tried to retry it but it still erred out.')
