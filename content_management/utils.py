@@ -548,7 +548,7 @@ def _parse_html_for_translation(html):
             div = etree.Element('div')
 
             content = etree.parse(StringIO("<div class=\"text\">{}</div>".format(stringify_children(anchor)))).getroot()
-            href_format = """<div class=\"href\"><![CDATA[{}]]></div>"""
+            href_format = """<div class=\"href\">{}</div>"""
             href_html = fix_html_fragment(href_format.format(anchor.attrib['href']))
 
             link = etree.parse(StringIO(href_html)).getroot()
