@@ -348,7 +348,7 @@ LOCALE_PATHS = (
 )
 
 CMS_PUBLIC_FOR = 'staff'
-CELERY_ALWAYS_EAGER = True
+#CELERY_ALWAYS_EAGER = True
 
 # Jira workflow settings
 
