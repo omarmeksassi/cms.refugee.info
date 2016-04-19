@@ -550,6 +550,7 @@ def _parse_html_for_translation(html):
 
         # Translatable anchors are split into text and links
         anchors = translatable_a(tree.getroot())
+        print (anchors)
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
             div = etree.Element('div')
@@ -606,7 +607,7 @@ def _parse_html_for_translation(html):
     soup = BeautifulSoup(html)
     for div in soup.find_all('div'):
         tag_format = None
-        while div.parent.name in ['b', 'em', 'i', 'strong', 'u']:
+        while div.parent and div.parent.name in ['b', 'em', 'i', 'strong', 'u']:
             if div.parent.name == "b":
                 div.parent.unwrap()
                 tag_format = "<b>{}</b>"
@@ -750,7 +751,9 @@ def _parse_html_for_content(html):
             swap_element_inbound(div, tel)
         html = etree.tostring(tree)
         # print(html)
-    return html.strip()
+
+    soup = BeautifulSoup(html)
+    return unicode(soup.prettify())
 
 
 def fix_html_fragment(html):
