@@ -121,7 +121,8 @@ def upsert_jira_ticket(page_pk):
                 jira_user_query = jira.search_users(current_user.email)
                 if jira_user_query:
                     jira_user = jira_user_query[0]
-                    jira.assign_issue(issue.id, jira_user.name)
+                    if jira_user and hasattr(jira_user, 'name'):
+                        jira.assign_issue(issue.id, jira_user.name)
         else:
             print('Not in staging')
     except Exception as e:

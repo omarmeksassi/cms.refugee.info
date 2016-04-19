@@ -370,10 +370,15 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
 
                 import difflib
 
-                diff = difflib.ndiff(source_html.splitlines(True), destination_html.splitlines(True))
-                if len(source_html) != len(destination_html):
+                diff_generator = difflib.context_diff(source_html.splitlines(True),
+                                                      destination_html.splitlines(True))
+                diff = ''.join(list(diff_generator))
+
+                if diff:
                     print("There is an inconsistency between staging and production. Language {}".format(k))
                     print("".join(diff))
+
+                    raise Exception("Incorrect Diff")
 
             if publish:
                 try:
@@ -593,7 +598,7 @@ def _parse_html_for_translation(html):
     # Chicken coop de grass
     # Massive regex that takes in phone numbers and puts them in divs
     # only to be postprocessed below and dissapear from the translations
-    p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
+    p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+|0\d+(?:\s+\d+)+)')
     html = p.sub('<div class="former-tel">\g<1></div>', html)
 
     soup = BeautifulSoup(html)
