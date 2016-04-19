@@ -390,6 +390,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     pass
     except Exception as e:
         print(e)
+        time.sleep(10)
         promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
 
 
