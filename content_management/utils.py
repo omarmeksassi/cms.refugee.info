@@ -342,6 +342,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 try:
                     destination_title = destination.get_title_obj(language=k)
                     if en_title and title and destination_title:
+                        destination_title.title = title.title
                         destination_title.page_title = title.page_title
                         destination_title.slug = en_title.slug
 
