@@ -9,7 +9,7 @@ from cms.toolbar.items import Break, SubMenu
 from cms.cms_toolbars import PAGE_MENU_IDENTIFIER, ADMINISTRATION_BREAK
 from cms import models
 
-
+@toolbar_pool.register
 class ContentToolbar(CMSToolbar):
     def populate(self):
         page = models.Page.objects.get(id=self.toolbar.get_object_pk())
