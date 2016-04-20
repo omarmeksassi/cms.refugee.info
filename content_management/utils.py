@@ -400,6 +400,10 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 except Exception as e:
                     print(e)
                     pass
+
+            currently_promoting = cache.get('PROMOTING', '')
+            currently_promoting = ','.join([a for a in currently_promoting.split(',') if a != slug])
+            cache.set('PROMOTING', currently_promoting, 60 * 10)
     except Exception as e:
         print(e)
         time.sleep(10)
