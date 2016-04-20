@@ -358,6 +358,7 @@ JIRA_PASSWORD = os.environ.get('JIRA_PASSWORD')
 JIRA_PROJECT = os.environ.get('JIRA_PROJECT', "CM")
 JIRA_ISSUE_TYPE = os.environ.get('JIRA_ISSUE_TYPE', "10003")
 JIRA_PAGE_ADDRESS_FIELD = os.environ.get('JIRA_PAGE_ADDRESS_FIELD', 'customfield_10024')
+JIRA_PAGE_ID_FIELD = os.environ.get('JIRA_PAGE_ID_FIELD', 'customfield_10400')
 JIRA_LANGUAGES = os.environ.get('JIRA_LANGUAGES', 'ar,fa')
 JIRA_TRANSITIONS = {
     'translations-complete': os.environ.get('JIRA_TRANSITIONS_TRANSLATED', 81),

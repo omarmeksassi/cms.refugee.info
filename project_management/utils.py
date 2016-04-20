@@ -54,8 +54,8 @@ def upsert_jira_ticket(page_pk):
             jira = __get_jira()
 
             already_started_query = 'status in ("In Translation Review", "In Translation",' + \
-                                    ' "In HTML Review") AND "Page Address" ~ "{}"'
-            already_started = jira.search_issues(already_started_query.format(page_url))
+                                    ' "In HTML Review") AND "Page Id" = "{}"'
+            already_started = jira.search_issues(already_started_query.format(page.id))
 
             for issue in already_started:
                 status = issue.fields.status
@@ -63,14 +63,15 @@ def upsert_jira_ticket(page_pk):
                 jira.add_comment(issue.id,
                                  'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
-            editing_query = 'status in ("Editing") AND "Page Address" ~ "{}" AND summary ~ "{}"'
-            print(editing_query.format(page_url, page_title))
+            editing_query = 'status in ("Editing") AND "Page Id" = "{}"'
+            print(editing_query.format(page.id))
 
-            editing_query = jira.search_issues(editing_query.format(page_url, page_title))
+            editing_query = jira.search_issues(editing_query.format(page.id))
             print(editing_query)
             if not editing_query:
                 issue = jira.create_issue(fields={
                     settings.JIRA_PAGE_ADDRESS_FIELD: page_url,
+                    settings.JIRA_PAGE_ID_FIELD: page.id,
                     'summary': page_title,
                     'project': settings.JIRA_PROJECT,
                     'issuetype': {'id': settings.JIRA_ISSUE_TYPE}
