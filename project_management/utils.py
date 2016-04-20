@@ -63,10 +63,10 @@ def upsert_jira_ticket(page_pk):
                 jira.add_comment(issue.id,
                                  'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
-            editing_query = 'status in ("Editing") AND "Page Address" ~ "{}"'
-            print(editing_query.format(page_url))
+            editing_query = 'status in ("Editing") AND "Page Address" ~ "{}" AND summary ~ "{}"'
+            print(editing_query.format(page_url, page_title))
 
-            editing_query = jira.search_issues(editing_query.format(page_url))
+            editing_query = jira.search_issues(editing_query.format(page_url, page_title))
             print(editing_query)
             if not editing_query:
                 issue = jira.create_issue(fields={
