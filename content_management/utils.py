@@ -264,28 +264,18 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
 
     User = get_user_model()
 
-    i = celery_app.control.inspect()
-    active_tasks = i.active() or {}
-    active = i.active() or {}
-    reserved = i.reserved() or {}
-    scheduled = i.scheduled() or {}
+    # cache.add fails if the key already exists
+    acquire_lock = lambda: cache.add('promoting-page', 'true', 60)
 
-    active = reduce(lambda a, b: a + b, active.itervalues(), [])
-    reserved = reduce(lambda a, b: a + b, reserved.itervalues(), [])
-    scheduled = reduce(lambda a, b: a + b, scheduled.itervalues(), [])
+    # memcache delete is very slow, but we have to use it to take
+    # advantage of using add() for atomic locking
+    release_lock = lambda: cache.delete('promoting-page')
 
-    scheduled = [s['request'] for s in scheduled]
-
-    tasks = (active or []) + (reserved or []) + (scheduled or [])
-
-    for t in tasks:
-        t['args'] = eval(t['args'])
-        t['kwargs'] = eval(t['kwargs'])
-
-    possible = [t for t in tasks if t['args'][0] == slug or ('slug' in t['kwargs'] and t['kwargs']['slug'] == slug)]
-    if len(possible) > 1:
-        print('Already promoting page: ' + slug)
-        return
+    while True:
+        if acquire_lock():
+            break
+        print('Page {} locked'.format(slug))
+        time.sleep(5)
 
     try:
 
@@ -413,8 +403,11 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     pass
     except Exception as e:
         print(e)
-        time.sleep(10)
-        promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
+        if 'Duplicate entry' not in str(e):
+            time.sleep(10)
+            promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
+    finally:
+        release_lock()
 
 
 def generate_html_for_diff(page=None, title=None, language='en'):
