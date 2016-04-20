@@ -143,18 +143,18 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
 
     User = get_user_model()
 
+    # cache.add fails if the key already exists
+    acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
+    # memcache delete is very slow, but we have to use it to take
+    # advantage of using add() for atomic locking
+    release_lock = lambda: cache.delete('publishing-translation')
+
     try:
         if language == 'en':
             return
         import cms.api
 
         internal_language = language if language not in SHIM_LANGUAGE_DICTIONARY else SHIM_LANGUAGE_DICTIONARY[language]
-
-        # cache.add fails if the key already exists
-        acquire_lock = lambda: cache.add('publishing-translation', 'true', 60 * 5)
-        # memcache delete is very slow, but we have to use it to take
-        # advantage of using add() for atomic locking
-        release_lock = lambda: cache.delete('publishing-translation')
 
         while True:
             if acquire_lock():
@@ -192,8 +192,8 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
 
         text = translation['content'].strip()
         text = _parse_html_for_content(text)
-
         soup = BeautifulSoup(text)
+
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(unicode(soup.prettify())), parser)
         selector = CSSSelector('div[data-id]')
@@ -245,8 +245,8 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
         blame = User.objects.filter(is_staff=True)[0]
 
         _translate_page(dict_list, internal_language, page)
+
         cms.api.publish_page(page, blame, internal_language)
-        release_lock()
     except Exception as e:
         if retry:
             time.sleep(5)
@@ -255,7 +255,8 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
             traceback.print_exc()
             print('Tried to retry it but it still erred out.')
             raise e
-
+    finally:
+        release_lock()
 
 @celery_app.task
 def promote_page(slug, publish=None, user_id=None, languages=None):
@@ -559,7 +560,7 @@ def _parse_html_for_translation(html):
     """
     p = re.compile(r'<.*?>')
     if p.findall(html):
-
+        html = unicode(BeautifulSoup(html).prettify())
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
         a = CSSSelector('a')
@@ -690,24 +691,26 @@ def _parse_html_for_content(html):
     p = re.compile(r'<.*?>')
     if p.findall(html):
         h = html_parser.HTMLParser()
-        try:
-            parser = etree.XMLParser()
-            tree = etree.parse(StringIO(html), parser)
-        except Exception as e:
-            parser = etree.HTMLParser()
-            tree = etree.parse(StringIO(html), parser)
+        html = unicode(BeautifulSoup(html).prettify())
+
+        parser = etree.HTMLParser()
+        tree = etree.parse(StringIO(html), parser)
 
         a = CSSSelector('div.former-anchor')
         translatable_a = CSSSelector('div.former-anchor-translatable')
         img = CSSSelector('div.former-image')
         phones = CSSSelector('div.former-tel')
 
+        def __parse_html(ht):
+            return unicode(BeautifulSoup(ht).prettify())
+
         anchors = a(tree)
         for anchor in anchors:
             attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if
                           'data-a-' in k]
 
-            div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(anchor)))).getroot()
+            ht_st = "<a>{}</a>".format(stringify_children(anchor))
+            div = etree.parse(StringIO(__parse_html(ht_st))).getroot()
             for k, v in attributes:
                 div.attrib[k] = v
 
@@ -728,7 +731,8 @@ def _parse_html_for_content(html):
                     if c.attrib['class'] == 'href':
                         link = c
 
-            div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(content)))).getroot()
+            ht_st = "<a>{}</a>".format(stringify_children(content))
+            div = etree.parse(StringIO(__parse_html(ht_st))).getroot()
             for k, v in attributes:
                 div.attrib[k] = v
 
