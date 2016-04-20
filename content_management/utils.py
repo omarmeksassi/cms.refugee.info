@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
-import traceback
 
 import json
 import re
 import time
+import traceback
 from StringIO import StringIO
 from collections import OrderedDict
 
@@ -257,6 +257,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
             raise e
     finally:
         release_lock()
+
 
 @celery_app.task
 def promote_page(slug, publish=None, user_id=None, languages=None):
@@ -570,6 +571,7 @@ def _parse_html_for_translation(html):
         # Translatable anchors are split into text and links
         anchors = translatable_a(tree.getroot())
         print(anchors)
+
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
             div = etree.Element('div')
@@ -691,7 +693,6 @@ def _parse_html_for_content(html):
     p = re.compile(r'<.*?>')
     if p.findall(html):
         h = html_parser.HTMLParser()
-        html = unicode(BeautifulSoup(html).prettify())
 
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html), parser)
@@ -701,16 +702,14 @@ def _parse_html_for_content(html):
         img = CSSSelector('div.former-image')
         phones = CSSSelector('div.former-tel')
 
-        def __parse_html(ht):
-            return unicode(BeautifulSoup(ht).prettify())
-
         anchors = a(tree)
         for anchor in anchors:
             attributes = [(k.replace('data-a-', ''), h.unescape(v)) for k, v in dict(anchor.attrib).iteritems() if
                           'data-a-' in k]
 
             ht_st = "<a>{}</a>".format(stringify_children(anchor))
-            div = etree.parse(StringIO(__parse_html(ht_st))).getroot()
+            div = etree.parse(StringIO(fix_html_fragment(ht_st))).getroot()
+
             for k, v in attributes:
                 div.attrib[k] = v
 
@@ -732,7 +731,8 @@ def _parse_html_for_content(html):
                         link = c
 
             ht_st = "<a>{}</a>".format(stringify_children(content))
-            div = etree.parse(StringIO(__parse_html(ht_st))).getroot()
+            div = etree.parse(StringIO(fix_html_fragment(ht_st))).getroot()
+
             for k, v in attributes:
                 div.attrib[k] = v
 
@@ -809,8 +809,8 @@ def _translate_page(dict_list, language, page):
                     instance.body = text
                 elif hasattr(instance, 'title'):
                     if type_name == "CMSTitlePlugin":
-                        soup = BeautifulSoup(text)
-                        instance.title = h.unescape(strip_html(soup.prettify())).strip()
+                        text = strip_html(fix_html_fragment(text))
+                        instance.title = h.unescape(text).strip()
                     else:
                         instance.title = text
                 elif hasattr(instance, 'name'):
