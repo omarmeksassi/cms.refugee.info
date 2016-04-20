@@ -192,10 +192,9 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
         text = translation['content'].strip()
         text = _parse_html_for_content(text)
 
-        html = StringIO(text)
-
+        soup = BeautifulSoup(text)
         parser = etree.HTMLParser()
-        tree = etree.parse(html, parser)
+        tree = etree.parse(unicode(soup), parser)
         selector = CSSSelector('div[data-id]')
         title_selector = CSSSelector('div.title')
 
