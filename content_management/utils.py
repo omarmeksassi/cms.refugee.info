@@ -803,7 +803,8 @@ def _translate_page(dict_list, language, page):
                     instance.body = text
                 elif hasattr(instance, 'title'):
                     if type_name == "CMSTitlePlugin":
-                        instance.title = h.unescape(strip_html(text)).strip()
+                        soup = BeautifulSoup(text)
+                        instance.title = h.unescape(strip_html(soup.prettify())).strip()
                     else:
                         instance.title = text
                 elif hasattr(instance, 'name'):
