@@ -263,6 +263,18 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
+    import random
+
+    time.sleep(random.randint(0, 10))
+
+    currently_promoting = cache.get('PROMOTING', '')
+    if currently_promoting:
+        if slug in currently_promoting.split(','):
+            print('Already promoting page: ' + slug)
+            return
+
+    currently_promoting = "{},{}".format((currently_promoting or ''), slug)
+    cache.set('PROMOTING', currently_promoting, 60 * 10)
 
     try:
 
@@ -550,7 +562,7 @@ def _parse_html_for_translation(html):
 
         # Translatable anchors are split into text and links
         anchors = translatable_a(tree.getroot())
-        print (anchors)
+        print(anchors)
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
             div = etree.Element('div')
@@ -601,7 +613,7 @@ def _parse_html_for_translation(html):
     # Chicken coop de grass
     # Massive regex that takes in phone numbers and puts them in divs
     # only to be postprocessed below and dissapear from the translations
-    p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+|0\d+(?:\s+\d+)+)')
+    p = re.compile(r'((?:\+\s*)*\d+(?:\s+\(*\d+\)*)*\d+(?:\s+\d+\(*\)*)+|\d+(?:\s+\d+)+|00\d+(?:\s+\d+)+)')
     html = p.sub('<div class="former-tel">\g<1></div>', html)
 
     soup = BeautifulSoup(html)
