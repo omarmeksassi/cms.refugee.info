@@ -265,9 +265,19 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
     User = get_user_model()
 
     i = celery_app.control.inspect()
-    active_tasks = i.active()
+    active_tasks = i.active() or {}
+    active = i.active() or {}
+    reserved = i.reserved() or {}
+    scheduled = i.scheduled() or {}
 
-    tasks = reduce(lambda a, b: a + b, active_tasks.itervalues(), [])
+    active = reduce(lambda a, b: a + b, active.itervalues(), [])
+    reserved = reduce(lambda a, b: a + b, reserved.itervalues(), [])
+    scheduled = reduce(lambda a, b: a + b, scheduled.itervalues(), [])
+
+    scheduled = [s['request'] for s in scheduled]
+
+    tasks = (active or []) + (reserved or []) + (scheduled or [])
+
     for t in tasks:
         t['args'] = eval(t['args'])
         t['kwargs'] = eval(t['kwargs'])
