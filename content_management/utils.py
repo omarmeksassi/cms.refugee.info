@@ -721,10 +721,11 @@ def _parse_html_for_content(html):
             link = etree.Element('div')
 
             for c in anchor:
-                if c.attrib['class'] == 'text':
-                    content = c
-                if c.attrib['class'] == 'href':
-                    link = c
+                if 'class' in c.attrib:
+                    if c.attrib['class'] == 'text':
+                        content = c
+                    if c.attrib['class'] == 'href':
+                        link = c
 
             div = etree.parse(StringIO("<a>{}</a>".format(stringify_children(content)))).getroot()
             for k, v in attributes:
@@ -749,23 +750,24 @@ def _parse_html_for_content(html):
 
         tels = phones(tree.getroot())
         for tel in tels:
-            classes = tel.attrib['class'].split(' ')
-            tag_format = "{}"
-            if 'has-b' in classes:
-                tag_format = "<b>{}</b>".format(tag_format)
-            if 'has-u' in classes:
-                tag_format = "<u>{}</u>".format(tag_format)
-            if 'has-strong' in classes:
-                tag_format = "<strong>{}</strong>".format(tag_format)
-            if 'has-em' in classes:
-                tag_format = "<em>{}</em>".format(tag_format)
-            if 'has-i' in classes:
-                tag_format = "<i>{}</i>".format(tag_format)
+            if 'class' in tel.attrib:
+                classes = tel.attrib['class'].split(' ')
+                tag_format = "{}"
+                if 'has-b' in classes:
+                    tag_format = "<b>{}</b>".format(tag_format)
+                if 'has-u' in classes:
+                    tag_format = "<u>{}</u>".format(tag_format)
+                if 'has-strong' in classes:
+                    tag_format = "<strong>{}</strong>".format(tag_format)
+                if 'has-em' in classes:
+                    tag_format = "<em>{}</em>".format(tag_format)
+                if 'has-i' in classes:
+                    tag_format = "<i>{}</i>".format(tag_format)
 
-            tag_format = "<span class=\"tel\">{}</span>".format(tag_format)
-            div = etree.parse(StringIO(tag_format.format(tel.attrib['data-tel-number']))).getroot()
+                tag_format = "<span class=\"tel\">{}</span>".format(tag_format)
+                div = etree.parse(StringIO(tag_format.format(tel.attrib['data-tel-number']))).getroot()
 
-            swap_element_inbound(div, tel)
+                swap_element_inbound(div, tel)
         html = etree.tostring(tree)
         # print(html)
 
