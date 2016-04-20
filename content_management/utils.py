@@ -392,7 +392,8 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     print("There is an inconsistency between staging and production. Language {}".format(k))
                     print("".join(diff))
 
-                    raise Exception("Incorrect Diff")
+                    if type(source_title).__name__ != 'EmptyTitle':
+                        raise Exception("Incorrect Diff")
 
             if publish:
                 try:
