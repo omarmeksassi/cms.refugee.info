@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
+import traceback
 
 import json
 import re
@@ -251,6 +252,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
             time.sleep(5)
             pull_from_transifex.delay(slug, language, project, False)
         else:
+            traceback.print_exc()
             print('Tried to retry it but it still erred out.')
             raise e
 
