@@ -16,7 +16,6 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
@@ -28,14 +27,12 @@ DEBUG = 'DATABASE_URL' not in os.environ
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 
 ROOT_URLCONF = 'cms_refugeeinfo.urls'
 
 WSGI_APPLICATION = 'cms_refugeeinfo.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -54,7 +51,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
@@ -211,21 +207,21 @@ CMS_LANGUAGES = {
         #    'hide_untranslated': False,
         #    'name': gettext('Serbian'),
         #    'redirect_on_fallback': True,
-        #},
-        #{
+        # },
+        # {
         #    'public': True,
         #    'code': 'mk',
         #    'hide_untranslated': False,
         #    'name': gettext('Macedonian'),
         #    'redirect_on_fallback': True,
-        #},
-        #{
+        # },
+        # {
         #    'public': True,
         #    'code': 'de',
         #    'hide_untranslated': False,
         #    'name': gettext('German'),
         #    'redirect_on_fallback': True,
-        #},
+        # },
     ],
 }
 
@@ -290,11 +286,9 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 # Amazon S3 URL
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 
-
 # Default File storage
 MEDIAFILES_LOCATION = 'media'
 STATICFILES_LOCATION = 'static'
-
 
 # Transifex Creds
 TRANSIFEX_USER = os.environ.get('TRANSIFEX_USER')
@@ -367,5 +361,11 @@ JIRA_TRANSITIONS = {
     'validated': os.environ.get('JIRA_TRANSITIONS_VALIDATED', 71),
 }
 
-
 PREPROCESS_HTML = False if not 'PREPROCESS_HTML' in os.environ else os.environ.get('PREPROCESS_HTML').split(',')
+
+CACHE = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
