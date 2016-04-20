@@ -263,18 +263,19 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
-    import random
 
-    time.sleep(random.randint(0, 10))
+    i = celery_app.control.inspect()
+    active_tasks = i.active()
 
-    currently_promoting = cache.get('PROMOTING', '')
-    if currently_promoting:
-        if slug in currently_promoting.split(','):
-            print('Already promoting page: ' + slug)
-            return
+    tasks = reduce(lambda a, b: a + b, active_tasks.itervalues(), [])
+    for t in tasks:
+        t['args'] = eval(t['args'])
+        t['kwargs'] = eval(t['kwargs'])
 
-    currently_promoting = "{},{}".format((currently_promoting or ''), slug)
-    cache.set('PROMOTING', currently_promoting, 60 * 10)
+    possible = [t for t in tasks if t['args'][0] == slug or ('slug' in t['kwargs'] and t['kwargs']['slug'] == slug)]
+    if len(possible) > 1:
+        print('Already promoting page: ' + slug)
+        return
 
     try:
 
@@ -400,10 +401,6 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                 except Exception as e:
                     print(e)
                     pass
-
-            currently_promoting = cache.get('PROMOTING', '')
-            currently_promoting = ','.join([a for a in currently_promoting.split(',') if a != slug])
-            cache.set('PROMOTING', currently_promoting, 60 * 10)
     except Exception as e:
         print(e)
         time.sleep(10)
