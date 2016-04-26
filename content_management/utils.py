@@ -6,6 +6,7 @@ import time
 import traceback
 from StringIO import StringIO
 from collections import OrderedDict
+import logging
 
 import requests
 from bs4 import BeautifulSoup
@@ -24,6 +25,8 @@ SHIM_LANGUAGE_DICTIONARY = {
 """
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
+
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task
@@ -77,17 +80,18 @@ def push_to_transifex(page_pk):
                                    headers={"Content-type": "application/json"},
                                    auth=(user, password),
                                    data=json.dumps(payload), )
-                print('New', r2.text)
+                logger.info('New ' + r2.text)
             else:
                 r2 = requests.put(fetch_format.format(**transifex_url_data) + 'content/',
                                   headers={"Content-type": "application/json"},
                                   auth=(user, password),
                                   data=json.dumps(payload), )
-                print('Updated', r2.text)
+
+                logger.info('Updated ' + r2.text)
 
             pull_completed_from_transifex.delay(page_pk)
     except Exception as e:
-        print(e)
+        logger.exception("Error pushing to transifex")
 
 
 @celery_app.task
@@ -118,8 +122,8 @@ def pull_completed_from_transifex(page_pk):
         }
         fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/stats/"
 
-        print("Trying to request:", fetch_format.format(**transifex_url_data))
-        print("With creds:", user, password)
+        logger.info("Trying to request: %s" % fetch_format.format(**transifex_url_data))
+        logger.info("With creds: %s %s" % (user, password))
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
@@ -134,7 +138,7 @@ def pull_completed_from_transifex(page_pk):
 
         project.transition_jira_ticket(slug)
     except Exception as e:
-        print('')
+        logger.exception('Error pulling completed from transifex')
 
 
 @celery_app.task
@@ -167,8 +171,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
         titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
 
         if not titles:
-            print('Page not found. Ignoring.')
-            return
+            logger.info('Page not found. Ignoring.')
 
         page = titles[0].page.get_draft_object()
 
@@ -183,8 +186,8 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
         }
         fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/translation/{language}/?mode=default"
 
-        print("Trying to request:", fetch_format.format(**transifex_url_data))
-        print("With creds:", user, password)
+        logger.info("Trying to request: %s" % fetch_format.format(**transifex_url_data))
+        logger.info("With creds: %s %s" % (user, password))
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
@@ -214,7 +217,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
                 title = title[0].text
                 title_obj = page.get_title_obj(internal_language, fallback=False)
                 if type(title_obj).__name__ == 'EmptyTitle':
-                    print('Creating new title')
+                    logger.info('Creating new title')
                     en_title_obj = page.get_title_obj('en')
                     title_obj = cms.api.create_title(
                         language=internal_language,
@@ -226,7 +229,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
                 title_obj.page_title = title.strip()
                 title_obj.save()
             except Exception as e:
-                print('Error updating the application.')
+                logger.exception('Error updating the application.')
 
         dict_list = []
 
@@ -253,7 +256,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
             pull_from_transifex.delay(slug, language, project, False)
         else:
             traceback.print_exc()
-            print('Tried to retry it but it still erred out.')
+            logger.info('Tried to retry it but it still erred out.')
             raise e
     finally:
         release_lock()
@@ -277,7 +280,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
     while True:
         if acquire_lock():
             break
-        print('Page {} locked'.format(slug))
+        logger.info('Page {} locked'.format(slug))
         time.sleep(5)
 
     try:
@@ -323,7 +326,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                     production_title = Title.objects.filter(language='en', slug=slug,
                                                             page__in=production.get_descendants())
         except:
-            print("Error creating production page.")
+            logger.exception("Error creating production page.")
 
         if staging_title and production_title:
             staging_title = staging_title[0]
@@ -366,7 +369,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                             destination_title.save()
 
                 except Exception as e:
-                    print("Error updating title.")
+                    logger.exception("Error updating title.")
 
             for placeholder in placeholders:
                 destination_placeholders[placeholder.slot].clear()
@@ -383,7 +386,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                     for k in languages:
                         cms.api.publish_page(destination, user, k)
                 except Exception as e:
-                    print(e)
+                    logger.exception('Error publishing')
                     pass
 
             for k in languages:
@@ -400,16 +403,16 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                 diff = ''.join(list(diff_generator))
 
                 if diff:
-                    print("There is an inconsistency between staging and production. Language {}".format(k))
-                    print("".join(diff))
+                    logger.info("There is an inconsistency between staging and production. Language {}".format(k))
+                    logger.info("".join(diff))
 
                     if type(source_title).__name__ != 'EmptyTitle':
                         raise Exception("Incorrect Diff")
 
     except Exception as e:
-        print(e)
+        logger.exception('Error in promotion')
         if 'Duplicate entry' not in str(e) and count < 10:
-            print ('Count {}'.format(count))
+            logger.info('Count {}'.format(count))
             import random
             promote_page.apply_async(
                 kwargs=dict(slug=slug, publish=publish, user_id=user_id, languages=languages, count=(count + 1)),
@@ -576,7 +579,7 @@ def _parse_html_for_translation(html):
 
         # Translatable anchors are split into text and links
         anchors = translatable_a(tree.getroot())
-        print(anchors)
+        logger.info(str(anchors))
 
         for anchor in anchors:
             attributes = [("data-a-{}".format(k), v) for k, v in dict(anchor.attrib).iteritems()]
@@ -780,7 +783,6 @@ def _parse_html_for_content(html):
 
                 swap_element_inbound(div, tel)
         html = etree.tostring(tree)
-        # print(html)
 
     soup = BeautifulSoup(html)
     return unicode(soup.prettify())

@@ -1,17 +1,16 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-__author__ = 'reyrodrigues'
-
-from django.conf import settings
-from cms.models import Title, Page
-
-from cms_refugeeinfo import celery_app
-
-import requests
-from jira import JIRA
-from StringIO import StringIO
+import logging
 import os
 import sys
+from StringIO import StringIO
+
+import requests
+from cms.models import Title, Page
+from django.conf import settings
+from jira import JIRA
+
+from cms_refugeeinfo import celery_app
 
 SHIM_LANGUAGE_DICTIONARY = {
     'ps': 'af'
@@ -19,6 +18,8 @@ SHIM_LANGUAGE_DICTIONARY = {
 """
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
+
+logger = logging.getLogger(__name__)
 
 
 def __get_jira():
@@ -48,7 +49,7 @@ def upsert_jira_ticket(page_pk):
             production = production[0].page
 
         if page in staging.get_descendants():
-            print("In staging")
+            logger.info("In staging")
             page_title = page.get_title_obj('en').page_title or page.get_title_obj('en').title
             page_url = page.get_absolute_url('en')
             jira = __get_jira()
@@ -64,10 +65,10 @@ def upsert_jira_ticket(page_pk):
                                  'Page was in {}, but it was published again by {}'.format(status, page.changed_by))
 
             editing_query = 'status in ("Editing") AND "Page Id" = "{}"'
-            print(editing_query.format(page.id))
+            logger.info(editing_query.format(page.id))
 
             editing_query = jira.search_issues(editing_query.format(page.id))
-            print(editing_query)
+            logger.info(editing_query)
             if not editing_query:
                 issue = jira.create_issue(fields={
                     settings.JIRA_PAGE_ADDRESS_FIELD: page_url,
@@ -76,7 +77,7 @@ def upsert_jira_ticket(page_pk):
                     'project': settings.JIRA_PROJECT,
                     'issuetype': {'id': settings.JIRA_ISSUE_TYPE}
                 })
-                print(issue)
+                logger.info(issue)
 
                 jira.add_comment(issue.id, 'Page published by {}'.format(page.changed_by))
             else:
@@ -111,7 +112,7 @@ def upsert_jira_ticket(page_pk):
                 except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    print(exc_type, fname, exc_tb.tb_lineno)
+                    logger.info("%s %s %s" % (exc_type, fname, exc_tb.tb_lineno))
 
                     raise e
 
@@ -125,11 +126,11 @@ def upsert_jira_ticket(page_pk):
                     if jira_user and hasattr(jira_user, 'name'):
                         jira.assign_issue(issue.id, jira_user.name)
         else:
-            print('Not in staging')
+            logger.info('Not in staging')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        logger.info("%s %s %s" % (exc_type, fname, exc_tb.tb_lineno))
 
         raise e
 
@@ -150,7 +151,7 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         titles = Title.objects.filter(language='en', slug=slug, page__in=staging.get_descendants())
 
         if not titles:
-            print('Page not found. Ignoring.')
+            logger.info('Page not found. Ignoring.')
             return
 
         page = titles[0].page.get_draft_object()
@@ -162,7 +163,7 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         for k, v in settings.TRANSIFEX_PROJECTS.iteritems():
             if page.get_slug('en') in v:
                 if project != k:
-                    print("Webhook from wrong project")
+                    logger.info("Webhook from wrong project")
                     return
 
         my_url = page.get_absolute_url('en')
@@ -174,12 +175,12 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         }
         fetch_format = "http://www.transifex.com/api/2/project/{project}/resource/{slug}html/stats/"
 
-        print("Trying to request:", fetch_format.format(**transifex_url_data))
-        print("With creds:", user, password)
+        logger.info("Trying to request: %s" % fetch_format.format(**transifex_url_data))
+        logger.info("With creds: %s %s" % (user, password))
 
         r = requests.get(fetch_format.format(**transifex_url_data), auth=(user, password))
 
-        print("Received from transifex:", r.text)
+        logger.info("Received from transifex: %s" % r.text)
         trans = r.json()
 
         in_translation = 'status in ("In Translation") AND "Page Address" ~ "{}"'
@@ -190,7 +191,7 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         completed = set([trans[a]['completed'] for a in languages])
 
         if len(reviewed_percentage) == 1 and list(reviewed_percentage)[0] == '100%':
-            print("Pusing to HTML Review")
+            logger.info("Pusing to HTML Review")
 
             jira_issues = jira.search_issues(in_translation.format(my_url))
             for issue in jira_issues:
@@ -202,7 +203,7 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
 
         elif len(completed) == 1 and list(completed)[0] == '100%':
 
-            print("Pusing to Translation Review")
+            logger.info("Pusing to Translation Review")
 
             jira_issues = jira.search_issues(in_translation.format(my_url))
             for issue in jira_issues:
@@ -211,6 +212,6 @@ def transition_jira_ticket(slug, project=settings.TRANSIFEX_PROJECT_SLUG):
         import os, sys
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        logger.info("%s %s %s" % (exc_type, fname, exc_tb.tb_lineno))
 
-        print('Tried to retry it but it still erred out.')
+        logger.info('Tried to retry it but it still erred out.')

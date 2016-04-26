@@ -337,7 +337,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'SysLog'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
 }
