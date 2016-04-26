@@ -328,10 +328,15 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'SysLog': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.SysLogHandler',
+            'address': ('logs4.papertrailapp.com', 54505)
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'SysLog'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN'),
         },
     },
