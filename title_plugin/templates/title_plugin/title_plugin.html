@@ -5,7 +5,7 @@
         {% if instance.icon %}
             <img src="{{ MEDIA_URL }}{{ instance.icon.icon }}" alt="{{ instance.icon.name }}" class="title-icon"/>
         {% endif %} &nbsp;
-        <a name="Anchor_{{ instance.id }}">{{ instance.title }}</a><br/>
+        <a name="Anchor_{{ instance.position }}">{{ instance.title }}</a><br/>
         <a href="#top" class="back-to-top">{% trans "Back to top" %}</a>
     </h3>
     <hr class="title-hr"/>

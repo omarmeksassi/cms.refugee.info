@@ -7,7 +7,7 @@
                         <img src="{{ MEDIA_URL }}{{ p.icon.icon }}" alt="{{ p.icon.name }}" class="title-icon"/>
                     {% endif %}
                 </td>
-                <td><a href="#Anchor_{{ p.id }}">{{ p.title }}</a></td>
+                <td><a href="#Anchor_{{ p.position }}">{{ p.title }}</a></td>
             </tr>
         {% endfor %}
     </table>
@@ -20,7 +20,7 @@
                     <img src="{{ MEDIA_URL }}{{ p.icon.icon }}" alt="{{ p.icon.name }}" class="title-icon"/>
                 {% endif %}
             </td>
-            <td><a href="#Anchor_{{ p.id }}">{{ p.title }}</a></td>
+            <td><a href="#Anchor_{{ p.position }}">{{ p.title }}</a></td>
         </tr>
     {% endfor %}
 </table>
