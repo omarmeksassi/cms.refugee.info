@@ -6,10 +6,10 @@ import time
 import traceback
 from StringIO import StringIO
 from collections import OrderedDict
-import logging
 
 import requests
 from bs4 import BeautifulSoup
+from celery.utils.log import get_task_logger
 from cms.models import Title, Page
 from django.conf import settings
 from django.core.cache import cache
@@ -26,7 +26,7 @@ SHIM_LANGUAGE_DICTIONARY = {
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 @celery_app.task

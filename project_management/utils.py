@@ -1,11 +1,11 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-import logging
 import os
 import sys
 from StringIO import StringIO
 
 import requests
+from celery.utils.log import get_task_logger
 from cms.models import Title, Page
 from django.conf import settings
 from jira import JIRA
@@ -19,7 +19,7 @@ SHIM_LANGUAGE_DICTIONARY = {
 The Shim above is because django doesnt support Pashto, but Transifex does.
 """
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 def __get_jira():

@@ -346,6 +346,14 @@ LOGGING = {
             'handlers': ['console', 'SysLog'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'celery.task': {
+            'handlers': ['console', 'SysLog'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'celery.worker': {
+            'handlers': ['console', 'SysLog'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        }
     },
 }
 
