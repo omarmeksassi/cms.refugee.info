@@ -348,19 +348,19 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                 # Doing some cleanup while I am at it
                 if en_title and title:
                     title.title = en_title.title
-                    title.slug = en_title.slug
+                    title.slug = en_title.slug.strip()
                     if hasattr(title, 'save'):
                         title.save()
 
-                if not k in available:
+                if k not in available:
                     cms.api.create_title(k, title.title, destination, slug=title.slug)
 
                 try:
                     destination_title = destination.get_title_obj(language=k)
                     if en_title and title and destination_title:
-                        destination_title.title = title.title
-                        destination_title.page_title = title.page_title
-                        destination_title.slug = en_title.slug
+                        destination_title.title = title.title.strip()
+                        destination_title.page_title = title.page_title.strip()
+                        destination_title.slug = en_title.slug.strip()
 
                         if hasattr(destination_title, 'save'):
                             destination_title.save()
@@ -409,7 +409,7 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
     except Exception as e:
         print(e)
         if 'Duplicate entry' not in str(e) and count < 10:
-            time.sleep(10)
+            print ('Count {}'.format(count))
             import random
             promote_page.apply_async(
                 kwargs=dict(slug=slug, publish=publish, user_id=user_id, languages=languages, count=(count + 1)),
