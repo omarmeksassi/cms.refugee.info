@@ -344,6 +344,12 @@ LOGGING = {
             'class': 'logging.handlers.SysLogHandler',
             'address': ('logs4.papertrailapp.com', 54505)
         },
+        'SysLog-Celery': {
+            'level': 'DEBUG',
+            'formatter': 'papertrail-celery',
+            'class': 'logging.handlers.SysLogHandler',
+            'address': ('logs4.papertrailapp.com', 54505)
+        },
     },
     'loggers': {
         'django': {
@@ -351,13 +357,11 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
         'celery': {
-            'handlers': ['console', 'SysLog'],
-            'formatter': 'papertrail-celery',
+            'handlers': ['console', 'SysLog-Celery'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
         'celery.task': {
-            'handlers': ['console', 'SysLog'],
-            'formatter': 'papertrail-celery',
+            'handlers': ['console', 'SysLog-Celery'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
