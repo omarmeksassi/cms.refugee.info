@@ -260,7 +260,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
 
 
 @celery_app.task
-def promote_page(slug, publish=None, user_id=None, languages=None):
+def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
     import cms.api
     from cms.utils import copy_plugins
     from django.contrib.auth import get_user_model
@@ -378,6 +378,14 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     copied_plugins = copy_plugins.copy_plugins_to(plugins, destination_placeholders[placeholder.slot],
                                                                   k)
 
+            if publish:
+                try:
+                    for k in languages:
+                        cms.api.publish_page(destination, user, k)
+                except Exception as e:
+                    print(e)
+                    pass
+
             for k in languages:
                 source_title = source.get_title_obj(language=k)
                 destination_title = destination.get_title_obj(language=k)
@@ -398,18 +406,16 @@ def promote_page(slug, publish=None, user_id=None, languages=None):
                     if type(source_title).__name__ != 'EmptyTitle':
                         raise Exception("Incorrect Diff")
 
-            if publish:
-                try:
-                    for k in languages:
-                        cms.api.publish_page(destination, user, k)
-                except Exception as e:
-                    print(e)
-                    pass
     except Exception as e:
         print(e)
-        if 'Duplicate entry' not in str(e):
+        if 'Duplicate entry' not in str(e) and count < 10:
             time.sleep(10)
-            promote_page.delay(slug=slug, publish=publish, user_id=user_id, languages=languages)
+            import random
+            promote_page.apply_async(
+                kwargs=dict(slug=slug, publish=publish, user_id=user_id, languages=languages, count=(count + 1)),
+                countdown=random.randint(10, 20)
+            )
+
     finally:
         release_lock()
 
@@ -801,6 +807,7 @@ def _translate_page(dict_list, language, page):
 
             if translation:
                 translation = translation[0]
+                translation['translated_id'] = instance.id
                 translation['translated_id'] = instance.id
 
                 text = translation['translated']
