@@ -17,7 +17,8 @@ app = Celery('cms')
 app.config_from_object('django.conf:settings')
 app.conf.update(
     CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
-    BROKER_URL='django://'
+    BROKER_URL='django://',
+    CELERYD_HIJACK_ROOT_LOGGER=False
 )
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
