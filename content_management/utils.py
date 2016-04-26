@@ -218,12 +218,12 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
                     en_title_obj = page.get_title_obj('en')
                     title_obj = cms.api.create_title(
                         language=internal_language,
-                        title=en_title_obj.title,
+                        title=en_title_obj.title.strip(),
                         page=page,
-                        slug=en_title_obj.slug,
+                        slug=en_title_obj.slug.strip(),
                     )
                     title_obj.save()
-                title_obj.page_title = title
+                title_obj.page_title = title.strip()
                 title_obj.save()
             except Exception as e:
                 print('Error updating the application.')
