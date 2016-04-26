@@ -329,6 +329,10 @@ LOGGING = {
             'format': '%(asctime)s CMS CMS: %(message)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S',
         },
+        'papertrail-celery': {
+            'format': '%(asctime)s CELERY CMS: %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S',
+        },
     },
     'handlers': {
         'console': {
@@ -348,10 +352,12 @@ LOGGING = {
         },
         'celery': {
             'handlers': ['console', 'SysLog'],
+            'formatter': 'papertrail-celery',
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
         'celery.task': {
             'handlers': ['console', 'SysLog'],
+            'formatter': 'papertrail-celery',
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
