@@ -324,12 +324,19 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'papertrail': {
+            'format': '%(asctime)s CMS CMS: %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
         },
         'SysLog': {
             'level': 'DEBUG',
+            'formatter': 'papertrail',
             'class': 'logging.handlers.SysLogHandler',
             'address': ('logs4.papertrailapp.com', 54505)
         },
