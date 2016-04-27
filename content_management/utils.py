@@ -403,15 +403,15 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                 diff = ''.join(list(diff_generator))
 
                 if diff:
-                    logger.info("There is an inconsistency between staging and production. Language {}".format(k))
-                    logger.info("".join(diff))
+                    logger.info("There is an inconsistency between staging and production. Language {}, {}".format(
+                        k,
+                        source_title.slug
+                    ))
 
-                    if type(source_title).__name__ != 'EmptyTitle':
-                        raise Exception("Incorrect Diff")
 
     except Exception as e:
         logger.exception('Error in promotion')
-        if 'Duplicate entry' not in str(e) and count < 10:
+        if count < 10:
             logger.info('Count {}'.format(count))
             import random
             promote_page.apply_async(
