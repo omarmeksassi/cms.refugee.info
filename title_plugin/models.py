@@ -34,6 +34,7 @@ class TitleIcon(models.Model):
 class TitlePlugin(CMSPlugin):
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name=_('Title'))
     is_important = models.BooleanField(default=False, verbose_name=_('Is Important'))
+    inherited = models.BooleanField(default=False, verbose_name=_('Inherited'))
     icon = models.ForeignKey(TitleIcon, null=True, blank=True, verbose_name=_('Icon'))
 
     def __unicode__(self):

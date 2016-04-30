@@ -408,7 +408,6 @@ def promote_page(slug, publish=None, user_id=None, languages=None, count=0):
                         source_title.slug
                     ))
 
-
     except Exception as e:
         logger.exception('Error in promotion')
         if count < 10:
