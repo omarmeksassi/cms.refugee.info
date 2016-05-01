@@ -1,6 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
-<div class="section-header{% if instance.is_important %} important{% endif %}">
+<div class="section-header{% if instance.is_important %} important{% endif %}{% if instance.inherited %} inherited{% endif %}">
     <h3 class="anchor">
         {% if instance.icon %}
             <img src="{{ MEDIA_URL }}{{ instance.icon.icon }}" alt="{{ instance.icon.name }}" class="title-icon"/>
