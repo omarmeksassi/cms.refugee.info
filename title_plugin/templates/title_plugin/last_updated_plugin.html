@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load tz %}
-<em>
+<em class="last-updated" data-date="{{ publication_date|utc|date:'c' }}">
     {% trans "Last updated on:" %} {{ publication_date|utc|localize }} UTC
 </em>
 <br/><br/>
