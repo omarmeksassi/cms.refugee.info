@@ -26,6 +26,7 @@ class LinkButtonPlugin(CMSPlugin):
 class TitleIcon(models.Model):
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     icon = models.ImageField(blank=True, null=True, verbose_name=_('Icon'))
+    vector_icon = models.CharField(max_length=200, null=True, blank=True, verbose_name=_('Vector Icon'))
 
     def __unicode__(self):
         return self.name
