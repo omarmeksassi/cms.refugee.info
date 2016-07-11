@@ -1,5 +1,5 @@
-WAIT=10     # Wait 10 seconds
-TIMEOUT=20  # Timeout after a minute
-ATTEMPTS=20  # attempt checks 10 times
+WAIT=10
+TIMEOUT=20
+ATTEMPTS=20
 
 /en/admin/login/                       Django
