@@ -88,6 +88,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'cms_refugeeinfo.basic_auth.BasicAuthMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -99,7 +100,8 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.page.CurrentPageMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
-    'cms.middleware.language.LanguageCookieMiddleware'
+    'cms.middleware.language.LanguageCookieMiddleware',
+        'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 INSTALLED_APPS = (
@@ -393,9 +395,22 @@ JIRA_TRANSITIONS = {
 
 PREPROCESS_HTML = False if not 'PREPROCESS_HTML' in os.environ else os.environ.get('PREPROCESS_HTML').split(',')
 
-CACHE = {
+CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
     }
 }
+
+
+if 'MEMCACHED_URL' in os.environ:
+    from urlparse import urlparse
+
+    memcached = urlparse(os.environ.get('MEMCACHED_URL'))
+
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '{}:{}'.format(memcached.hostname, (memcached.port or 11211)),
+        }
+    }
