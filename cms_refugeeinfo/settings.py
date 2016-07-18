@@ -232,7 +232,6 @@ CMS_TEMPLATES = (
     ('fullwidth.html', 'Fullwidth'),
 )
 
-CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
 
@@ -373,8 +372,9 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
 )
 
-CMS_PUBLIC_FOR = 'staff'
+# CMS_PUBLIC_FOR = 'all'
 # CELERY_ALWAYS_EAGER = True
+# CMS_PERMISSION = True
 
 # Jira workflow settings
 

@@ -245,7 +245,7 @@ def pull_from_transifex(slug, language, project=settings.TRANSIFEX_PROJECT_SLUG,
                                                               ]),
             }
             dict_list.append(plugin_dict)
-        blame = User.objects.filter(is_staff=True)[0]
+        blame = User.objects.filter(is_staff=True, is_superuser=True)[0]
 
         _translate_page(dict_list, internal_language, page)
 
