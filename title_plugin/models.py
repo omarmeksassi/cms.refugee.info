@@ -37,6 +37,7 @@ class TitlePlugin(CMSPlugin):
     is_important = models.BooleanField(default=False, verbose_name=_('Is Important'))
     inherited = models.BooleanField(default=False, verbose_name=_('Inherited'))
     icon = models.ForeignKey(TitleIcon, null=True, blank=True, verbose_name=_('Icon'))
+    anchor_name = models.SlugField(max_length=250, null=True, blank=True, verbose_name=_('Custom Anchor Name'))
 
     def __unicode__(self):
         return self.title
