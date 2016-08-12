@@ -36,6 +36,7 @@ class TitlePlugin(CMSPlugin):
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name=_('Title'))
     is_important = models.BooleanField(default=False, verbose_name=_('Is Important'))
     inherited = models.BooleanField(default=False, verbose_name=_('Inherited'))
+    hide_from_toc = models.BooleanField(default=False, verbose_name=_('Hide from Table of Contents'))
     icon = models.ForeignKey(TitleIcon, null=True, blank=True, verbose_name=_('Icon'))
     anchor_name = models.SlugField(max_length=250, null=True, blank=True, verbose_name=_('Custom Anchor Name'))
 
