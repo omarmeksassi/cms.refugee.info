@@ -40,8 +40,8 @@ class CMSTocPlugin(CMSPluginBase):
         plugins = [a.get_plugin_instance()[0] for a in sorted(plugins, key=lambda p: p.position)
                    if type(a.get_plugin_instance()[1]) is CMSTitlePlugin]
 
-        important = [a for a in plugins if a.is_important if a]
-        not_important = [a for a in plugins if not a.is_important if a]
+        important = [a for a in plugins if a and a.is_important]
+        not_important = [a for a in plugins if a and not a.is_important]
 
         context.update({'not_important': not_important, 'important': important})
 
