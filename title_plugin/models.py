@@ -10,6 +10,7 @@ class TocPlugin(CMSPlugin):
     def __unicode__(self):
         return "Table of contents"
 
+
 class LastUpdatedPlugin(CMSPlugin):
     def __unicode__(self):
         return "Last updated"
@@ -39,6 +40,11 @@ class TitlePlugin(CMSPlugin):
     hide_from_toc = models.BooleanField(default=False, verbose_name=_('Hide from Table of Contents'))
     icon = models.ForeignKey(TitleIcon, null=True, blank=True, verbose_name=_('Icon'))
     anchor_name = models.SlugField(max_length=250, null=True, blank=True, verbose_name=_('Custom Anchor Name'))
+    position_in_hierarchy = models.CharField(max_length=2, null=True, blank=True,
+                                             verbose_name=_('Position in Hierarchy'), choices=(
+            ('U', 'Above child content'),
+            ('D', 'Below child content'),
+        ))
 
     def __unicode__(self):
         return self.title

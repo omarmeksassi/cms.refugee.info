@@ -2,6 +2,7 @@
 {% load i18n %}
 <div class="section-header{% if instance.is_important %} important{% endif %}{% if instance.inherited %} inherited{% endif %}"
 data-vector-icon="{{ instance.icon.vector_icon }}" data-anchor-name="{% firstof instance.anchor_name "" %}"
+     data-position-hierarchy="{% firstof instance.position_in_hierarchy "" %}"
      data-hide-from-toc="{% if instance.hide_from_toc %}true{% endif %}">
     <h3 class="anchor">
         {% if instance.icon %}
